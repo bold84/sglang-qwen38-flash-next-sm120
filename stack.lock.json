@@ -1,0 +1,276 @@
+{
+  "schema": 1,
+  "release": {
+    "manifest": "release.json",
+    "version": "0.1.0",
+    "candidate": 9,
+    "candidate_tag": "v0.1.0-rc.9",
+    "stable_tag": "v0.1.0",
+    "cache_schema": "v8"
+  },
+  "image": {
+    "repository": "sglang-qwen38-flash-next-sm120",
+    "tag": "v0.1.0-rc.9",
+    "platform": "linux/amd64",
+    "containerfile_target": "runtime"
+  },
+  "model": {
+    "repository": "Qwen/Qwen3.8-Flash-Next-FP8",
+    "revision": "bcd9f01ddc9cff2316eb84281bebcd5b058bddce",
+    "architecture": "Qwen4ExpForConditionalGeneration",
+    "model_type": "qwen4_exp",
+    "storage_bytes": 185553536918,
+    "native_context_length": 262144,
+    "served_model_name": "qwen38-flash-next-sm120"
+  },
+  "hardware": {
+    "compute_capability": "sm_120",
+    "platform": "linux/amd64",
+    "qualification_targets": [
+      "2x NVIDIA RTX PRO 6000 Blackwell, TP=2, EP=2"
+    ],
+    "explicitly_unqualified": [
+      "sm_121",
+      "linux/arm64"
+    ]
+  },
+  "pins": [
+    {
+      "arg": "QWEN38_RELEASE_VERSION",
+      "value": "0.1.0",
+      "description": "Stable SemVer target; candidate and stable tags share one image manifest."
+    },
+    {
+      "arg": "QWEN38_RELEASE_CANDIDATE",
+      "value": "9",
+      "description": "Ninth private dual-SM120 candidate; rebuilds the retained MTP-3 profile after a same-session refresh of SGLang and FlashInfer main."
+    },
+    {
+      "arg": "QWEN38_CACHE_SCHEMA",
+      "value": "v8",
+      "description": "Fresh compiled-kernel cache namespace for the latest-main SGLang and FlashInfer candidate."
+    },
+    {
+      "arg": "QWEN38_SGLANG_BASE",
+      "value": "lmsysorg/sglang:nightly-dev-cu13-20260826-41e7612d@sha256:5f9319ef797bd258594de8f879911ffd8300f3393e1b885fedea4a9bea74294d",
+      "description": "Latest available CUDA 13 nightly-dev dependency base at candidate composition, pinned by image-index digest."
+    },
+    {
+      "arg": "QWEN38_SGLANG_BASE_HEAD",
+      "value": "41e7612dee44e262ba2f474546a5144c449c6596",
+      "description": "SGLang source commit represented by the official base."
+    },
+    {
+      "arg": "QWEN38_SGLANG_MAIN_HEAD",
+      "value": "7f27bf470824f452a34e866d22ab5e332a23e26f",
+      "description": "Current upstream SGLang main fetched immediately before candidate composition."
+    },
+    {
+      "arg": "QWEN38_SGLANG_MAIN_TREE",
+      "value": "9a15203d2cc3b256f78a96a6617ee5c783e1b1c1",
+      "description": "Tree of the current upstream SGLang main commit."
+    },
+    {
+      "arg": "QWEN38_SGLANG_PR36497_HEAD",
+      "value": "73a255206f916366c8d26d4022f82ddfb0ab558d",
+      "description": "Live upstream Qwen3.8-Flash-Next support PR head integrated onto current main."
+    },
+    {
+      "arg": "QWEN38_SGLANG_PR36556_HEAD",
+      "value": "dac5523d1e5d2f4297fec40ef02fc76fb0f662d1",
+      "description": "Live upstream SM120 QSA resolver and SGLang FA4 fallback head integrated after Qwen support."
+    },
+    {
+      "arg": "QWEN38_SGLANG_INTEGRATION_HEAD",
+      "value": "b03fdaa5c4bb011908e9359c498dbe20a5e05deb",
+      "description": "Reviewed local integration head: current main plus Qwen PR #36497, PR #36556, and both MTP current-main fixes."
+    },
+    {
+      "arg": "QWEN38_SGLANG_EFFECTIVE_TREE",
+      "value": "1cf4eb136f470e0dba5eed62d107d16e6bc3ed85",
+      "description": "Final SGLang tree reproduced from current main and the archived integration patch."
+    },
+    {
+      "arg": "QWEN38_MODEL_REVISION",
+      "value": "bcd9f01ddc9cff2316eb84281bebcd5b058bddce",
+      "description": "Immutable Hugging Face revision of the official FP8 checkpoint."
+    },
+    {
+      "arg": "QWEN38_FLASHINFER_VERSION",
+      "value": "0.6.18",
+      "description": "Package version produced by the exact FlashInfer main source install."
+    },
+    {
+      "arg": "QWEN38_FLASHINFER_MAIN_HEAD",
+      "value": "e4b7fa4b7c3ba5e17286d9c59f2bcf2ca07e0a6d",
+      "description": "Current upstream FlashInfer main fetched immediately before candidate composition."
+    },
+    {
+      "arg": "QWEN38_FLASHINFER_MAIN_TREE",
+      "value": "2c9c021eb87fb09c982076b8a0b63514bc399e56",
+      "description": "Tree of the current upstream FlashInfer main commit."
+    }
+  ],
+  "integration": {
+    "sglang": {
+      "base": "7f27bf470824f452a34e866d22ab5e332a23e26f",
+      "head": "b03fdaa5c4bb011908e9359c498dbe20a5e05deb",
+      "upstream_pr_head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
+      "effective_tree": "1cf4eb136f470e0dba5eed62d107d16e6bc3ed85",
+      "commits": [
+        {
+          "source": "sgl-project/sglang#36497",
+          "source_head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
+          "subject": "Introduce Qwen 3.8 Flash Next; conflict-resolved onto current main"
+        },
+        {
+          "source": "local SM120 runtime integration after upstream audit",
+          "source_head": "3e4519023143c2ba9dc8ad042603c7c52da89a4b",
+          "subject": "Enable Qwen SM120 current-main runtime"
+        },
+        {
+          "source": "local current-main compatibility fix after live MTP startup",
+          "source_head": "58d92af13835d40ec8f7857fffbdd69653a967bd",
+          "subject": "Fix Qwen4 MTP parallel config access"
+        },
+        {
+          "source": "local conflict-resolution fix after the first live MTP request",
+          "source_head": "7cc81dd9674d936a38ce4fabba9f5a0fe60aad14",
+          "subject": "Fix Qwen MTP runtime context import"
+        },
+        {
+          "source": "sgl-project/sglang#36556",
+          "source_head": "dac5523d1e5d2f4297fec40ef02fc76fb0f662d1",
+          "subject": "Use the current upstream SM120 QSA resolver and architecture-owned FA4 fallback"
+        }
+      ]
+    },
+    "flashinfer": {
+      "head": "e4b7fa4b7c3ba5e17286d9c59f2bcf2ca07e0a6d",
+      "tree": "2c9c021eb87fb09c982076b8a0b63514bc399e56",
+      "package_version": "0.6.18",
+      "base_package_version": "0.6.17",
+      "install": "exact non-editable source install with BUILD_NVEP=0 plus matching cubin package from the same checkout; base 0.6.17 cubin and JIT cache removed"
+    }
+  },
+  "patches": [
+    {
+      "repository": "sglang",
+      "order": 1,
+      "path": "patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.9.patch",
+      "sha256": "58522c126e4c20371327ed087c75dbfb81cf3426b9fa74996ef40e27b6c2d2e6",
+      "source": "current-main integration of sgl-project/sglang#36497, #36556, and the MTP current-main fixes",
+      "source_head": "b03fdaa5c4bb011908e9359c498dbe20a5e05deb"
+    }
+  ],
+  "verification": {
+    "sglang_repository": "https://github.com/sgl-project/sglang.git",
+    "flashinfer_repository": "https://github.com/flashinfer-ai/flashinfer.git",
+    "evidence_repository": "https://github.com/ormandj/sglang-qwen38-flash-next-sm120",
+    "upstream_main_observed": "7f27bf470824f452a34e866d22ab5e332a23e26f",
+    "upstream_main_observed_at": "2026-08-26T17:44:01-05:00",
+    "upstream_audit": {
+      "sglang_main_tree": "9a15203d2cc3b256f78a96a6617ee5c783e1b1c1",
+      "qwen_support_pr": {
+        "number": 36497,
+        "head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
+        "state": "open",
+        "merge_state": "dirty",
+        "issue_comment_count": 1,
+        "review_comment_count": 0,
+        "review_count": 0
+      },
+      "sm120_qsa_pr": {
+        "number": 36556,
+        "head": "dac5523d1e5d2f4297fec40ef02fc76fb0f662d1",
+        "state": "open",
+        "merge_state": "unstable",
+        "issue_comment_count": 2,
+        "review_comment_count": 0,
+        "review_count": 0
+      },
+      "sm120_gdn_prefill_pr": {
+        "number": 36357,
+        "head": "9e216d34c9835414b9120624ff32a1b582cfa252",
+        "state": "open"
+      },
+      "merged_sm120_gdn_state_fix": {
+        "commit": "8a1e6e4e461044246739b5a1ad579c8acc556a2d",
+        "disposition": "retained from current main; converts SM120 prefill state/checkpoints to float32 while preserving the BF16 pool"
+      },
+      "merged_spec_allocation_fix": {
+        "commit": "06694071c6552383af9dce3f55e805d394ec4438",
+        "disposition": "retained from refreshed current main; avoids tensor scalar reads during speculative decode allocation"
+      },
+      "sglang_relevant_open_prs": [
+        {
+          "number": 36572,
+          "head": "4792adca935f2a2974ce04985e3b15a1eb63474e",
+          "state": "open-blocked",
+          "disposition": "not carried; the global JIT current-stream wrapper adds per-launch overhead, has no unit tests or reviews, and both base and extra CI were failing at audit time"
+        },
+        {
+          "number": 36567,
+          "head": "d4477bd298aef3edae611eb7b2e533d5526e324b",
+          "state": "open",
+          "disposition": "not carried; experimental TP1 NVMe PLE streaming does not replace the pinned-host TP2 path"
+        }
+      ],
+      "flashinfer_main_head": "e4b7fa4b7c3ba5e17286d9c59f2bcf2ca07e0a6d",
+      "flashinfer_main_tree": "2c9c021eb87fb09c982076b8a0b63514bc399e56",
+      "flashinfer_main_package_version": "0.6.18",
+      "flashinfer_base_package_version": "0.6.17",
+      "flashinfer_relevant_prs": [
+        {
+          "number": 4756,
+          "head": "3d5688d9adad7fa459c2e95ace3ef9e0268a19e6",
+          "state": "open-review-blocked",
+          "disposition": "not carried; experimental Qwen3.6 routing is allowlisted for a different workload and review reports invalid-expert GPU indexing, device-validation, and retry-lifecycle defects"
+        },
+        {
+          "number": 4698,
+          "head": "4f31d319c2a93f8d62a48b118cc12d02cbc33223",
+          "state": "open",
+          "disposition": "not carried; validated TP2 SM120 decode-shape registry and tests are a later performance follow-up"
+        },
+        {
+          "number": 4720,
+          "head": "cf48f71e23e791421847c86ab932a4ca979e26ba",
+          "state": "open-review-blocked",
+          "disposition": "not carried; SM12x grouped-MoE work has no SGLang integration and current review identifies small-batch and numerical-coverage issues"
+        },
+        {
+          "number": 4733,
+          "head": "648544f72c566fe6e475c5b7ac5fae7324167369",
+          "state": "open-approved",
+          "disposition": "not carried; activation primitive is not reached by the current Triton FP8 MoE route"
+        },
+        {
+          "number": 4745,
+          "head": "d6548d346c5eb4aa68646a201fb9ff9485dfe978",
+          "state": "open",
+          "disposition": "not carried; public GDN MTP control API is plumbing rather than a kernel or schedule change"
+        },
+        {
+          "number": 4512,
+          "head": "1e15d55e543ffcabe7cc6f69dd22ddc8cfc0a632",
+          "state": "open-blocked",
+          "disposition": "not carried; dynamic FP32 MTP pool-kernel reuse is not required for the request-path correctness fix"
+        },
+        {
+          "number": 4476,
+          "head": "5dc42b5574c4d9e7295670e6ce2646c0a28407f5",
+          "state": "open-blocked",
+          "disposition": "not carried; broader multistream workspace fix has passing rerun CI but is outside this narrow SGLang correction"
+        },
+        {
+          "number": 4507,
+          "head": "8054d4cd6810e91b97f9edc4bae19e7e223c0b39",
+          "state": "open",
+          "disposition": "not carried; device-target compilation change is not needed by the pinned SM120 FlashInfer package path"
+        }
+      ]
+    },
+    "qualification_state": "bring-up-and-gsm8k-passed-publication-gates-pending"
+  }
+}

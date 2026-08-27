@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "product": "sglang-qwen38-flash-next-sm120",
+  "version": "0.1.0",
+  "candidate": 9,
+  "candidate_tag": "v0.1.0-rc.9",
+  "stable_tag": "v0.1.0",
+  "cache_schema": "v8",
+  "platform": "linux/amd64"
+}
