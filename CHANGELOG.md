@@ -12,12 +12,17 @@
 - Ship the measured per-GPU FlashInfer CUTLASS MoE tactic cache (the NVFP4
   analogue of the FP8 Triton tile JSONs) inside the image and seed it into
   `CACHE_DIR` on first start.
-- Pin NCCL to Simple/16-channel/256-thread in the launcher for the dual-GPU
-  PCIe all-reduce path.
-- Record the NVFP4 interleaved same-night validation: prefill TTFT -6.5 to
-  -7.9% across 8K-262K, C16 output +3.8 to +8.1%, C1 step-time neutral, and
-  GSM8K unchanged within sampling noise.
-
+- Pin the FlashInfer tactic cache across restarts: the cross-rank agreement
+  digest now compares the rank-agnostic tactic multiset instead of raw
+  per-rank files (whose keys embed the rank), so a seeded or previously
+  tuned cache is no longer silently discarded and re-drawn on every start.
+- Record the controlled 5x256 GSM8K gate: the shipped stack is
+  accuracy-neutral versus the pre-edit tree (two identical pre-edit server
+  instances bracket the candidate within the ~0.5-point server lottery),
+  and the fused HC-mix up-GEMM epilogue was rejected on a 5/5 accuracy
+  regression despite its 1.5x kernel win.
+- Reject adaptive speculative decoding (QSA draft cap and adaptive-state
+  crashes) and record the remaining candidate dispositions.
 
 ## v0.1.0-rc.9
 

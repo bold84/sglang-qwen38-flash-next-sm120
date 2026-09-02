@@ -82,13 +82,13 @@
     },
     {
       "arg": "QWEN38_SGLANG_INTEGRATION_HEAD",
-      "value": "0ae7c39bf357688591207213c22e81c3d7c698d6",
-      "description": "Reviewed local integration head: refreshed main plus the Qwen/QSA upstream chain, the ported SM120 performance work, and the NVFP4 runtime candidates."
+      "value": "c8306b73058eabeb80d907474bd01cd855b1bd52",
+      "description": "Reviewed local integration head: refreshed main plus the Qwen/QSA upstream chain, the ported SM120 performance work, the NVFP4 runtime candidates, and the rank-agnostic autotune cache digest fix."
     },
     {
       "arg": "QWEN38_SGLANG_EFFECTIVE_TREE",
-      "value": "b20d07d3c73078980dc1d078b083efc7a8725dc6",
-      "description": "Final host-optimized NVFP4 SGLang tree reproduced from current main and the archived integration patch."
+      "value": "f9e73d6c5f900289cd2a6aa73c171765e19718be",
+      "description": "Final host-optimized NVFP4 SGLang tree reproduced from current main and the archived integration patch; includes the tactic-cache pinning fix."
     },
     {
       "arg": "QWEN38_MODEL_REVISION",
@@ -114,9 +114,9 @@
   "integration": {
     "sglang": {
       "base": "99b910955377375a1385122680e0daefcf706f79",
-      "head": "0ae7c39bf357688591207213c22e81c3d7c698d6",
+      "head": "c8306b73058eabeb80d907474bd01cd855b1bd52",
       "upstream_pr_head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
-      "effective_tree": "b20d07d3c73078980dc1d078b083efc7a8725dc6",
+      "effective_tree": "f9e73d6c5f900289cd2a6aa73c171765e19718be",
       "commits": [
         {
           "source": "sgl-project/sglang#36497",
@@ -177,6 +177,11 @@
           "source": "local NVFP4 runtime enablement and tuning",
           "source_head": "0ae7c39bf357688591207213c22e81c3d7c698d6",
           "subject": "feat(nvfp4): SM120 default backend resolution, cutlass prefill path, extend-bucket autotune"
+        },
+        {
+          "source": "local autotune cache reliability fix",
+          "source_head": "c8306b73058eabeb80d907474bd01cd855b1bd52",
+          "subject": "fix(autotune): rank-agnostic per-rank cache digest"
         }
       ]
     },
@@ -211,9 +216,9 @@
       "repository": "sglang",
       "order": 1,
       "path": "patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.10.patch",
-      "sha256": "d7d838990f7877444da2c7acc7fb50cb379cea8a55945b968204068f7ebc1bcd",
-      "source": "Refreshed-current-main integration of sgl-project/sglang#36497, #36556, #36649, #36667, #36772, #36806, and #36845, the ported SM120 performance kernels, QSA speculative-decode fixes, and the NVFP4 flashinfer_cutlass enablement with extend-bucket autotuning",
-      "source_head": "0ae7c39bf357688591207213c22e81c3d7c698d6"
+      "sha256": "c177add1064bf8fe0775f2d7e1dc189413f172937eff97aaef810c0778aab23c",
+      "source": "Refreshed-current-main integration of sgl-project/sglang#36497, #36556, #36649, #36667, #36772, #36806, and #36845, the ported SM120 performance kernels, QSA speculative-decode fixes, the NVFP4 flashinfer_cutlass enablement with extend-bucket autotuning, and the rank-agnostic tactic-cache digest",
+      "source_head": "c8306b73058eabeb80d907474bd01cd855b1bd52"
     }
   ],
   "verification": {

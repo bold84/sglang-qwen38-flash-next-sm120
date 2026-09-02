@@ -9882,15 +9882,15 @@ index 0000000000..2420aed2e7
 +]
 diff --git a/python/sglang/srt/layers/hc_mix_triton.py b/python/sglang/srt/layers/hc_mix_triton.py
 new file mode 100644
-index 0000000000..8a6b9e2a99
+index 0000000000..36d7c762b0
 --- /dev/null
 +++ b/python/sglang/srt/layers/hc_mix_triton.py
-@@ -0,0 +1,238 @@
+@@ -0,0 +1,237 @@
 +"""Fused HC low-rank mix for decode-size batches.
 +
 +``GatedResidual._mix_compute`` is five launches in eager/Inductor at decode
-+rows. This kernel keeps a grid of exactly one CTA per SM resident for the whole
-+operation:
++rows. The persistent kernel below keeps a grid of exactly one CTA per SM
++resident for the whole operation:
 +
 +* phase 0 - zero the fp32 accumulator ``t_raw`` (strided across CTAs)
 +* phase A - grid-strided (n-block, k-chunk) tiles of ``x @ W_down.T``
@@ -9914,7 +9914,6 @@ index 0000000000..8a6b9e2a99
 +import triton.language as tl
 +
 +_FUSED_MIX_MAX_ROWS = 16
-+
 +
 +@triton.jit
 +def _grid_barrier(counter_ptr, num_ctas):
@@ -10126,10 +10125,10 @@ index 0000000000..8a6b9e2a99
 +    return out
 diff --git a/python/sglang/srt/layers/hyperconnection.py b/python/sglang/srt/layers/hyperconnection.py
 new file mode 100644
-index 0000000000..36de4b73de
+index 0000000000..37d24cc111
 --- /dev/null
 +++ b/python/sglang/srt/layers/hyperconnection.py
-@@ -0,0 +1,347 @@
+@@ -0,0 +1,348 @@
 +from typing import Optional
 +
 +import msgspec
@@ -10300,6 +10299,7 @@ index 0000000000..36de4b73de
 +                and lowrank % 8 == 0
 +            )
 +            self._mix_up_weight_padded = None
++
 +
 +        if use_combine:
 +            self.block_inject_weight = nn.Linear(
@@ -12388,10 +12388,43 @@ index 38b7fccd42..6a290f52b8 100644
              available_bytes // self._cell_size
              if self._cell_size
 diff --git a/python/sglang/srt/model_executor/runner/flashinfer_autotune.py b/python/sglang/srt/model_executor/runner/flashinfer_autotune.py
-index 5c56e55c18..f051bfe554 100644
+index 5c56e55c18..56c3c5e802 100644
 --- a/python/sglang/srt/model_executor/runner/flashinfer_autotune.py
 +++ b/python/sglang/srt/model_executor/runner/flashinfer_autotune.py
-@@ -246,6 +246,29 @@ def _drop_diverged_autotune_cache(
+@@ -212,6 +212,13 @@ def _autotune_cache_digest(cache_path: Path, env: dict[str, str]) -> str:
+     Includes the environment: ``load_configs`` ignores the whole file when its
+     ``_metadata`` stamp disagrees with the environment reading it, so equal
+     tactics alone do not mean two ranks load the same thing.
++
++    The cache keys embed rank-stamped extras (each rank writes its own
++    ``rank_tp{N}`` file whose keys differ by the rank index), so the digest
++    compares the rank-agnostic projection: the ``_metadata`` stamp plus the
++    multiset of chosen ``(runner, tactic)`` values. Two files that picked the
++    same tactics for the same shapes hash equally; any tactic difference
++    still hashes differently.
+     """
+     if not cache_path.is_file():
+         return ""
+@@ -221,7 +228,17 @@ def _autotune_cache_digest(cache_path: Path, env: dict[str, str]) -> str:
+         return ""
+     if not isinstance(configs, dict):
+         return ""
+-    payload = {"file": configs, "env": env}
++    normalized = {
++        "_metadata": configs.get("_metadata", {}),
++        # Skip "_generation" and any future underscore-stamped bookkeeping:
++        # they are write stamps, not tactics.
++        "tactics": sorted(
++            str(value)
++            for key, value in configs.items()
++            if not key.startswith("_")
++        ),
++    }
++    payload = {"file": normalized, "env": env}
+     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+ 
+ 
+@@ -246,6 +263,29 @@ def _drop_diverged_autotune_cache(
      cache_path.unlink(missing_ok=True)
  
  
@@ -12421,7 +12454,7 @@ index 5c56e55c18..f051bfe554 100644
  @contextlib.contextmanager
  def flashinfer_autotune_context(model_runner: ModelRunner, *, run_lm_head: bool):
      # The gate below decides on the same inputs load_configs does.
-@@ -277,10 +300,19 @@ def flashinfer_autotune_context(model_runner: ModelRunner, *, run_lm_head: bool)
+@@ -277,10 +317,19 @@ def flashinfer_autotune_context(model_runner: ModelRunner, *, run_lm_head: bool)
          from sglang.srt.layers.logits_processor import autotune_dummy_run_mode
  
          skip_ops = get_flashinfer_autotune_skip_ops(mr)
@@ -21785,7 +21818,7 @@ index 0000000000..838f7212e0
 +if __name__ == "__main__":
 +    unittest.main()
 diff --git a/test/registered/unit/model_executor/runner/test_flashinfer_autotune.py b/test/registered/unit/model_executor/runner/test_flashinfer_autotune.py
-index cacb8bd003..78ebf62af3 100644
+index cacb8bd003..af8be208c4 100644
 --- a/test/registered/unit/model_executor/runner/test_flashinfer_autotune.py
 +++ b/test/registered/unit/model_executor/runner/test_flashinfer_autotune.py
 @@ -47,6 +47,41 @@ def test_packed_speculative_extend_is_limited_to_pd_prefill_target(mode, error):
@@ -21830,6 +21863,74 @@ index cacb8bd003..78ebf62af3 100644
  
  def test_chunked_prefill_disabled_uses_legacy_token_ceiling():
      model_runner = SimpleNamespace(
+@@ -93,5 +128,67 @@ def test_chunked_prefill_disabled_uses_legacy_token_ceiling():
+     )
+ 
+ 
++
++def test_autotune_cache_digest_ignores_rank_stamps_and_generation():
++    """Per-rank cache files embed the rank in their keys and a per-write
++    ``_generation`` stamp; the cross-rank agreement digest must compare the
++    rank-agnostic tactic multiset instead of raw file bytes."""
++    import json
++    import tempfile
++    from pathlib import Path
++
++    metadata = {"gpu": "sm120", "version": "0.6.18"}
++    rank0 = {
++        "_metadata": metadata,
++        "_generation": "aaa",
++        "('trtllm::fused_moe::gemm1', rank=0)": ["MoERunner", 16],
++        "('trtllm::fused_moe::gemm2', rank=0)": ["MoERunner", 58],
++    }
++    rank1_same = {
++        "_metadata": metadata,
++        "_generation": "bbb",
++        "('trtllm::fused_moe::gemm1', rank=1)": ["MoERunner", 16],
++        "('trtllm::fused_moe::gemm2', rank=1)": ["MoERunner", 58],
++    }
++    rank1_diff = {
++        "_metadata": metadata,
++        "_generation": "bbb",
++        "('trtllm::fused_moe::gemm1', rank=1)": ["MoERunner", 17],
++        "('trtllm::fused_moe::gemm2', rank=1)": ["MoERunner", 58],
++    }
++    env = {"gpu": "sm120"}
++    with tempfile.TemporaryDirectory() as tmp:
++        paths = {}
++        for name, payload in (
++            ("rank0", rank0),
++            ("rank1_same", rank1_same),
++            ("rank1_diff", rank1_diff),
++        ):
++            path = Path(tmp) / f"{name}.json"
++            path.write_text(json.dumps(payload))
++            paths[name] = path
++
++        digest = flashinfer_autotune._autotune_cache_digest
++        assert digest(paths["rank0"], env) == digest(paths["rank1_same"], env)
++        assert digest(paths["rank0"], env) != digest(paths["rank1_diff"], env)
++        assert digest(paths["rank0"], env) != digest(Path(tmp) / "missing", env)
++
++
++def test_autotune_cache_digest_includes_environment():
++    import json
++    import tempfile
++    from pathlib import Path
++
++    payload = {
++        "_metadata": {"gpu": "sm120"},
++        "('op', rank=0)": ["MoERunner", 16],
++    }
++    with tempfile.TemporaryDirectory() as tmp:
++        path = Path(tmp) / "rank0.json"
++        path.write_text(json.dumps(payload))
++        digest = flashinfer_autotune._autotune_cache_digest
++        assert digest(path, {"gpu": "sm120"}) != digest(path, {"gpu": "sm100"})
++
++
+ if __name__ == "__main__":
+     sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/unit/server_args/test_server_args.py b/test/registered/unit/server_args/test_server_args.py
 index b81bdd2dfd..ec5c622e98 100644
 --- a/test/registered/unit/server_args/test_server_args.py
