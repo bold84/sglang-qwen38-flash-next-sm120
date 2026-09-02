@@ -69,8 +69,11 @@ outside the converter's own record.**
   vs fusion-off on otherwise identical pinned servers. Rejected under the
   sign-test rule. Lesson: kernel-level bf16 reassociation in a 48-layer
   hyper-connection path can be quality-relevant even when unit tests match
-  the fp64 reference at 2e-2. If retried, gate with 5×256 **before**
-  believing perf.
+  the fp64 reference at 2e-2. Root cause found later the same day by
+  forensic recovery of the deleted kernel: not a reassociation accident but
+  a single missing bf16 logits rounding before the sigmoid — see the
+  Addendum; the idea is one cast line from being retryable. If retried,
+  gate with 5×256 **before** believing perf.
 - **Adaptive speculative decoding** (`--speculative-adaptive`): default
   ladder [1,3,7]@bs1 violates the QSA compress-ratio-4 draft cap
   (`speculative_num_draft_tokens <= 4` → NotImplementedError); a QSA-safe
@@ -172,3 +175,48 @@ outside the converter's own record.**
 - FP8 precedent: per-GPU Triton tile JSONs under
   `sglang/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/`;
   drop-in selector `SGLANG_MOE_CONFIG_DIR` (FP8 only).
+
+---
+
+## Addendum — HC-fusion failure root-caused (2026-09-03, read-only forensic recovery; refines the failed-ideas entry)
+
+A forensics pass recovered the deleted epilogue kernel from the Triton
+compile cache after source recovery failed (`.pyc` files were regenerated
+at restoration; a read-only dangling-blob scan found no copy). Recovery:
+`cache/sglang-qwen38-flash-next-sm120/nvfp4-prefill-tuned/triton/FLL6DBYQ…/_hc_mix_up_epilogue_kernel.ttir`
+(compiled 02:13:48) plus a second specialization (rows-divisibility
+variant, 02:08:55), with test intent recovered from
+`work/sglang/test/.pytest_cache/v/cache/nodeids` and the wrapper signature
+from `/tmp/bench_hc_mix_up.py`.
+
+1. **No logic bug.** Formula, branch packing (`gemm_n = j*4+b`,
+   pre-permuted up-weights `[j,b,k]`, X remap `(n%4)*HS + n//4`), row/K
+   masking, fp32 accumulation (`tt.dot` → 64×256 f32, no atomics), and the
+   final bf16 store all match the reference structure. Tests had covered
+   rows 256/2048/8192/8256 (fp16+bf16) and a small-row gate — no boundary
+   defect.
+2. **Single primary divergence: a missing bf16 logits rounding.** The
+   compiled reference materializes up-projection logits to bf16
+   (`F.linear` global write) before the fp32 sigmoid·mul·mean epilogue;
+   the fused kernel fed the raw fp32 accumulator straight into `sigmoid`.
+   It was *more precise than the reference* — and therefore a numerically
+   different model. The lesson upgrades from "bf16 reassociation is risky"
+   to: **dtype-boundary fidelity to the validated runtime is the property
+   that matters, not accuracy.** `no_less_accurate_than_eager` passes by
+   construction; only a `matches_compiled_semantics` test at prefill sizes
+   would have caught it — that test existed for the decode path only
+   (rows 17/128).
+3. **Fix spec if retried (one line, register-only):** after the K loop,
+   `logits = acc.to(tl.bfloat16).to(tl.float32)` before the sigmoid.
+   Keep layout, fp32 epilogue, bf16 store unchanged; optionally make the
+   HC=4 reduction branch-sequential `((b0+b1)+b2)+b3` to match Inductor's
+   order. Expected to retain the −2.7…−3.7% TTFT. Gate unchanged:
+   5×256, pinned tactics, sign test.
+4. **CPU quantification of the skipped cast** (seed-fixed; HC=4, HS=64,
+   lowrank=16, rows=8192; 2.1 M gates): 99.94% of gate values change
+   (mean |Δ| 1.9e-4, max 8.2e-4); after final bf16 store, 16.8% of mixed
+   outputs flip, mostly by 1 ulp. Compounded over ~48 mix sites per token
+   into greedy argmax, plausibly the 9–11/256 flips observed (the
+   −3.7/−3.8pt A/B). Attribution caveat: every launch in that window
+   logged "per-rank caches disagree … tuning from scratch", so tactic
+   lottery leaves an unquantified non-cast residual.
