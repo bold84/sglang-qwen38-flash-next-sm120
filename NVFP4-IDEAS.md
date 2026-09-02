@@ -157,10 +157,18 @@ outside the converter's own record.**
 
 ## Untested ideas (ranked, for the retry)
 
-1. ~~`TORCH_BLAS_PREFER_CUBLASLT=1`~~ — **tested 09-03, rejected**: see
-   Failed ideas. Next up: **QSA draft-extend host sync removal** (code;
-   `extend_seq_lens_cpu` CPU-mirror idiom already exists), then the
-   HC-fusion one-line fix from the Addendum, then QSA BLOCK_N tuning.
+1. ~~`TORCH_BLAS_PREFER_CUBLASLT=1`~~ — **tested 09-03, rejected** (see
+   Failed ideas). ~~QSA draft-extend host sync removal~~ — **landed 09-03**
+   (`perf(qsa)` @ `3fa2e31651` on the retry branch): the row total now comes
+   from `extend_seq_lens_cpu` (lockstep mirror; `.item()` kept only as the
+   gpu_only fallback), unit-tested for mirror/fallback equivalence. Interleaved
+   A/B: wall-clock **neutral** at 8K-chunk C1 (505.4 vs 507.6 ms median
+   TTFT), 32K/131K identical, C1 step 13.65 ms — the stall hides behind
+   queued work in this shape, as profiled. Kept: last stream sync in the
+   speculative metadata path; pays at smaller chunks / higher prefill
+   concurrency / after AR wins. Next: the **HC-fusion one-line fix** from
+   the Addendum (the only candidate with a concrete −3% TTFT attached),
+   then QSA BLOCK_N tuning.
 2. **QSA chunk-prefill BLOCK_N table** — non-H20 devices inherit a
    Hopper-era `_L20_CONFIGS` table; (16,1,2) at 8 192 tokens; sweep
    (32,4,2)/(32,4,3)/(64,2,2). Ceiling ~4–6 ms/chunk (~1%).
