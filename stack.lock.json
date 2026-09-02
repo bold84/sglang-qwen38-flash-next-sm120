@@ -3,14 +3,14 @@
   "release": {
     "manifest": "release.json",
     "version": "0.1.0",
-    "candidate": 10,
-    "candidate_tag": "v0.1.0-rc.10",
+    "candidate": 11,
+    "candidate_tag": "v0.1.0-rc.11",
     "stable_tag": "v0.1.0",
     "cache_schema": "v9"
   },
   "image": {
     "repository": "sglang-qwen38-flash-next-sm120",
-    "tag": "v0.1.0-rc.10",
+    "tag": "v0.1.0-rc.11",
     "platform": "linux/amd64",
     "containerfile_target": "runtime"
   },
@@ -42,8 +42,8 @@
     },
     {
       "arg": "QWEN38_RELEASE_CANDIDATE",
-      "value": "10",
-      "description": "Tenth private dual-SM120 candidate: NVFP4 quantization on the refreshed current main with the SM120 performance profile."
+      "value": "11",
+      "description": "Eleventh private dual-SM120 candidate: the retry branch with the accuracy-gated HC-mix fused epilogue and sync-free QSA row mapping."
     },
     {
       "arg": "QWEN38_CACHE_SCHEMA",
@@ -82,13 +82,13 @@
     },
     {
       "arg": "QWEN38_SGLANG_INTEGRATION_HEAD",
-      "value": "c8306b73058eabeb80d907474bd01cd855b1bd52",
-      "description": "Reviewed local integration head: refreshed main plus the Qwen/QSA upstream chain, the ported SM120 performance work, the NVFP4 runtime candidates, and the rank-agnostic autotune cache digest fix."
+      "value": "4fe45c3dba5ebb886173c6321316b88ae4079382",
+      "description": "Retry integration head: refreshed main plus Qwen/QSA chain, SM120 performance port, NVFP4 enablement, autotune digest fix, sync-free QSA row mapping, and the numerics-contract-fixed HC-mix fused epilogue."
     },
     {
       "arg": "QWEN38_SGLANG_EFFECTIVE_TREE",
-      "value": "f9e73d6c5f900289cd2a6aa73c171765e19718be",
-      "description": "Final host-optimized NVFP4 SGLang tree reproduced from current main and the archived integration patch; includes the tactic-cache pinning fix."
+      "value": "eaa4682c92b33e90d33efc707785a7f3cde594cf",
+      "description": "Retry tree reproduced from current main and the rc.11 patch."
     },
     {
       "arg": "QWEN38_MODEL_REVISION",
@@ -114,9 +114,9 @@
   "integration": {
     "sglang": {
       "base": "99b910955377375a1385122680e0daefcf706f79",
-      "head": "c8306b73058eabeb80d907474bd01cd855b1bd52",
+      "head": "4fe45c3dba5ebb886173c6321316b88ae4079382",
       "upstream_pr_head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
-      "effective_tree": "f9e73d6c5f900289cd2a6aa73c171765e19718be",
+      "effective_tree": "eaa4682c92b33e90d33efc707785a7f3cde594cf",
       "commits": [
         {
           "source": "sgl-project/sglang#36497",
@@ -182,6 +182,11 @@
           "source": "local autotune cache reliability fix",
           "source_head": "c8306b73058eabeb80d907474bd01cd855b1bd52",
           "subject": "fix(autotune): rank-agnostic per-rank cache digest"
+        },
+        {
+          "source": "local retry speed work",
+          "source_head": "4fe45c3dba5ebb886173c6321316b88ae4079382",
+          "subject": "perf(qsa) sync-free row mapping + feat(hc-mix) fixed fused epilogue"
         }
       ]
     },
@@ -215,10 +220,10 @@
     {
       "repository": "sglang",
       "order": 1,
-      "path": "patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.10.patch",
-      "sha256": "c177add1064bf8fe0775f2d7e1dc189413f172937eff97aaef810c0778aab23c",
-      "source": "Refreshed-current-main integration of sgl-project/sglang#36497, #36556, #36649, #36667, #36772, #36806, and #36845, the ported SM120 performance kernels, QSA speculative-decode fixes, the NVFP4 flashinfer_cutlass enablement with extend-bucket autotuning, and the rank-agnostic tactic-cache digest",
-      "source_head": "c8306b73058eabeb80d907474bd01cd855b1bd52"
+      "path": "patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.11.patch",
+      "sha256": "955f8af111a0883db88fc0275787333e32de9b39f77ab12f185c123a46031882",
+      "source": "Retry branch: refreshed-current-main integration, SM120 performance port, NVFP4 flashinfer_cutlass enablement with extend-bucket autotuning, autotune tactic-cache digest fix, sync-free QSA speculative row mapping, numerics-contract-fixed HC-mix fused prefill epilogue",
+      "source_head": "4fe45c3dba5ebb886173c6321316b88ae4079382"
     }
   ],
   "verification": {

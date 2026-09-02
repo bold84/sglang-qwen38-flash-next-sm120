@@ -4,7 +4,7 @@ Reproducible SGLang container source for the ModelOpt NVFP4
 [`RadixArk/Qwen3.8-Flash-Next-NVFP4`](https://huggingface.co/RadixArk/Qwen3.8-Flash-Next-NVFP4)
 checkpoint on two NVIDIA RTX PRO 6000 Blackwell GPUs (SM120).
 
-This is an experimental `v0.1.0-rc.10` source release. The NVFP4 candidate
+This is an experimental `v0.1.0-rc.11` source release. The NVFP4 candidate
 has passed dual-SM120 startup, text, reasoning, tool-call, decode,
 cold-prefill through native 262K context, and GSM8K screening; its
 interleaved same-night validation is recorded in [`BENCHMARKS.md`](BENCHMARKS.md).
@@ -72,7 +72,7 @@ the exact source bundle locally:
 docker build --platform linux/amd64 \
   --build-arg IMAGE_SOURCE=https://github.com/ormandj/sglang-qwen38-flash-next-sm120 \
   --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" \
-  -t sglang-qwen38-flash-next-sm120:v0.1.0-rc.10 .
+  -t sglang-qwen38-flash-next-sm120:v0.1.0-rc.11 .
 ```
 
 Then point the launcher at the downloaded NVFP4 snapshot and a persistent,

@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.1.0-rc.11
+
+- Rebase the release onto the retry branch: sync-free QSA speculative row
+  mapping (last stream sync in the spec metadata path) and the HC-mix fused
+  prefill up-projection epilogue with the numerics contract fixed (model-
+  dtype logits rounding at the F.linear boundary, Inductor-order branch
+  reduction); prefill TTFT -3% (8K) / -4.3% (32K) over rc.10's tree on the
+  same tactic draw, gated 5x256 GSM8K (above control 5/5).
+- Patch: sha256 955f8af1..., applies onto upstream main 99b9109553,
+  reproduces effective tree eaa4682c9.
+
 ## v0.1.0-rc.10
 
 - Switch the bundle to the Qwen3.8-Flash-Next NVFP4 (ModelOpt FP4) checkpoint

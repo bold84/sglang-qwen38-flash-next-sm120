@@ -1,4 +1,4 @@
-# Run v0.1.0-rc.10 (NVFP4)
+# Run v0.1.0-rc.11 (NVFP4)
 
 ## Requirements
 
@@ -22,7 +22,7 @@ Build the image from the repository root:
 docker build --platform linux/amd64 \
   --build-arg IMAGE_SOURCE=https://github.com/ormandj/sglang-qwen38-flash-next-sm120 \
   --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" \
-  -t sglang-qwen38-flash-next-sm120:v0.1.0-rc.10 .
+  -t sglang-qwen38-flash-next-sm120:v0.1.0-rc.11 .
 ```
 
 Start the tested profile:
@@ -30,7 +30,7 @@ Start the tested profile:
 ```bash
 export MODEL_DIR=/models/RadixArk/Qwen3.8-Flash-Next-NVFP4
 export CACHE_DIR=/srv/cache/sglang-qwen38-flash-next-sm120-v9
-export IMAGE=sglang-qwen38-flash-next-sm120:v0.1.0-rc.10
+export IMAGE=sglang-qwen38-flash-next-sm120:v0.1.0-rc.11
 ./examples/serve-qwen38-flash-next.sh
 ```
 

@@ -7,7 +7,7 @@ set -euo pipefail
 : "${MODEL_DIR:?set MODEL_DIR to the Qwen3.8-Flash-Next-NVFP4 snapshot directory}"
 : "${CACHE_DIR:?set CACHE_DIR to a persistent, image-specific cache directory}"
 
-IMAGE=${IMAGE:-sglang-qwen38-flash-next-sm120:v0.1.0-rc.10}
+IMAGE=${IMAGE:-sglang-qwen38-flash-next-sm120:v0.1.0-rc.11}
 PORT=${PORT:-8000}
 CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0,1}
 TP_SIZE=${TP_SIZE:-2}

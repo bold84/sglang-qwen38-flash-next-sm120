@@ -4051,7 +4051,7 @@ index 9309b3b6a9..1a1163e7e2 100644
  
  
 diff --git a/python/sglang/srt/environ.py b/python/sglang/srt/environ.py
-index d858de8854..f63a13e411 100644
+index d858de8854..b39f6cb870 100644
 --- a/python/sglang/srt/environ.py
 +++ b/python/sglang/srt/environ.py
 @@ -298,6 +298,15 @@ class Envs:
@@ -4070,13 +4070,16 @@ index d858de8854..f63a13e411 100644
      SGLANG_PREFETCH_BLOCK_SIZE_MB = EnvInt(16)
      SGLANG_GEMMA_OUT_OF_PLACE_POSITION_MUTATION = EnvBool(False)
      SGLANG_ENABLE_WEIGHT_LOADER_V2 = EnvBool(False)
-@@ -1053,6 +1062,13 @@ class Envs:
+@@ -1053,6 +1062,16 @@ class Envs:
      # Enable the allowlisted low-M BF16 Split-K GEMM path on Blackwell. Shapes
      # outside the measured allowlist continue to use CuTe DSL/cuBLAS.
      SGLANG_ENABLE_BF16_SPLITK_GEMM = EnvBool(True)
 +    # Route decode-size HC mix through the fused CuTe split-K GEMM pair
 +    # instead of the persistent Triton mix.
 +    SGLANG_HC_MIX_CUDA = EnvBool(True)
++    # Fuse the prefill-scale HC-mix up projection with its sigmoid/mul/mean
++    # epilogue in one Triton kernel (rows >= the persistent-kernel cap).
++    SGLANG_HC_MIX_PREFILL_FUSED = EnvBool(True)
 +    # Log each distinct (m, n, k) the BF16 GEMM dispatch sees (allowlist tuning).
 +    SGLANG_BF16_GEMM_LOG_SHAPES = EnvBool(False)
 +    # Split the HC combine gate dot across CTAs instead of one CTA per row.
@@ -7700,10 +7703,10 @@ index 0000000000..b0aa5e934a
 +]
 diff --git a/python/sglang/srt/layers/attention/qwen_sparse_attn_backend.py b/python/sglang/srt/layers/attention/qwen_sparse_attn_backend.py
 new file mode 100644
-index 0000000000..2420aed2e7
+index 0000000000..25f58c2d81
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qwen_sparse_attn_backend.py
-@@ -0,0 +1,2176 @@
+@@ -0,0 +1,2188 @@
 +"""Sparse-attention backend for Qwen4-Exp models with an indexer.
 +
 +The backend is installed as the full-attention side of Qwen4-Exp's hybrid backend;
@@ -8129,7 +8132,19 @@ index 0000000000..2420aed2e7
 +            # those tail rows to request row 0, mirroring the CUDA-graph
 +            # speculative layout padding, so gathers stay in bounds.
 +            repeats = extend_seq_lens[:batch_size].to(dtype=torch.long)
-+            real_rows = int(repeats.sum().item())
++            # The CPU mirror is maintained in lockstep with the device
++            # tensor by the speculative batch builders and by DP padding
++            # (same fill value on both sides), so the row total is available
++            # host-side; the readback remains only as a fallback for
++            # gpu_only batches that never published the mirror.
++            extend_seq_lens_cpu = forward_batch.extend_seq_lens_cpu
++            if (
++                extend_seq_lens_cpu is not None
++                and len(extend_seq_lens_cpu) >= batch_size
++            ):
++                real_rows = sum(extend_seq_lens_cpu[:batch_size])
++            else:
++                real_rows = int(repeats.sum().item())
 +            if real_rows > num_rows:
 +                raise ValueError(
 +                    "QSA speculative query rows are fewer than the extend "
@@ -9882,11 +9897,11 @@ index 0000000000..2420aed2e7
 +]
 diff --git a/python/sglang/srt/layers/hc_mix_triton.py b/python/sglang/srt/layers/hc_mix_triton.py
 new file mode 100644
-index 0000000000..36d7c762b0
+index 0000000000..7f24d369ee
 --- /dev/null
 +++ b/python/sglang/srt/layers/hc_mix_triton.py
-@@ -0,0 +1,237 @@
-+"""Fused HC low-rank mix for decode-size batches.
+@@ -0,0 +1,402 @@
++"""Fused HC low-rank mix kernels.
 +
 +``GatedResidual._mix_compute`` is five launches in eager/Inductor at decode
 +rows. The persistent kernel below keeps a grid of exactly one CTA per SM
@@ -9902,9 +9917,20 @@ index 0000000000..36d7c762b0
 +The barrier counters are reset by the last CTA to finish, so a captured CUDA
 +graph replays with the buffers back in their initial state.
 +
-+Row counts beyond ``_FUSED_MIX_MAX_ROWS`` keep the existing ``torch.compile``
-+path, because this software grid barrier relies on every CTA being concurrently
-+resident.
++Row counts beyond ``_FUSED_MIX_MAX_ROWS`` cannot keep a single-CTA-per-SM
++barrier resident, so prefill-scale rows take the split path added here: the
++caller runs the down projection (cuBLAS) plus silu, then
++``fused_hc_mix_up_epilogue`` fuses the up projection with the
++sigmoid/multiply/branch-mean epilogue, writing ``[rows, hidden]`` directly
++instead of materializing the ``[rows, hc*hidden]`` intermediate.
++
++Numerics contract (a first attempt was rejected for violating it): the
++reference chain materializes the up-projection logits to the model dtype at
++the ``F.linear`` global write before the fused fp32 sigmoid/mul/mean tail
++reads them. This kernel must reproduce that rounding —
++``acc -> dtype -> fp32`` before the sigmoid — and reduce the HC branches in
++Inductor's sequential order. Being *more precise* than the reference makes a
++numerically different model, which the GSM8K sign test detects.
 +"""
 +
 +from __future__ import annotations
@@ -9914,6 +9940,160 @@ index 0000000000..36d7c762b0
 +import triton.language as tl
 +
 +_FUSED_MIX_MAX_ROWS = 16
++
++_HC_MIX_UP_EPILOGUE_MIN_ROWS = 256
++_HC_MIX_UP_EPILOGUE_BLOCK_M = 64
++_HC_MIX_UP_EPILOGUE_BLOCK_N = 64
++_HC_MIX_UP_EPILOGUE_BLOCK_K = 32
++_HC_MIX_UP_EPILOGUE_WARPS = 4
++_HC_MIX_UP_EPILOGUE_STAGES = 3
++
++
++@triton.jit
++def _hc_mix_up_epilogue_kernel(
++    x_ptr,      # [rows, hc*hs] activations, branch-major
++    t_ptr,      # [rows, lowrank] silu(down/hc) result
++    w_ptr,      # [hs*hc, lowrank] up weight, interleaved row hs*hc+branch
++    out_ptr,    # [rows, hs]
++    rows,
++    lowrank,
++    hs,
++    BLOCK_M: tl.constexpr,
++    BLOCK_N: tl.constexpr,
++    BLOCK_K: tl.constexpr,
++    HC_: tl.constexpr,
++    inv_hc: tl.constexpr,
++):
++    pid_m = tl.program_id(0)
++    pid_n = tl.program_id(1)
++
++    offs_m = pid_m * BLOCK_M + tl.arange(0, BLOCK_M)
++    offs_hs = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)
++    offs_branch = tl.arange(0, HC_)
++    gemm_n = offs_hs[:, None] * HC_ + offs_branch[None, :]
++    gemm_n_flat = tl.reshape(gemm_n, (BLOCK_N * HC_,))
++
++    offs_k = tl.arange(0, BLOCK_K)
++    m_mask = offs_m < rows
++
++    acc = tl.zeros((BLOCK_M, BLOCK_N * HC_), dtype=tl.float32)
++    for k0 in range(0, lowrank, BLOCK_K):
++        k_mask = (k0 + offs_k) < lowrank
++        t = tl.load(
++            t_ptr + offs_m[:, None] * lowrank + (k0 + offs_k)[None, :],
++            mask=m_mask[:, None] & k_mask[None, :],
++            other=0.0,
++        ).to(w_ptr.dtype.element_ty)
++        w = tl.load(
++            w_ptr + gemm_n_flat[None, :] * lowrank + (k0 + offs_k)[:, None],
++            mask=k_mask[:, None],
++            other=0.0,
++        )
++        acc += tl.dot(t, w, out_dtype=tl.float32)
++
++    # Numerics contract: round the accumulator to the model dtype exactly
++    # where the reference F.linear materializes its output, then run the
++    # fused fp32 epilogue on the rounded logits.
++    logits = acc.to(out_ptr.dtype.element_ty).to(tl.float32)
++
++    x_n = (gemm_n_flat % HC_) * hs + gemm_n_flat // HC_
++    xg = tl.load(
++        x_ptr + offs_m[:, None] * (hs * HC_) + x_n[None, :],
++        mask=m_mask[:, None],
++        other=0.0,
++    ).to(tl.float32)
++
++    contrib = tl.sigmoid(logits) * xg
++    if HC_ == 4:
++        # Inductor's fused mean reduces the branches sequentially in fp32;
++        # tl.split pins that order instead of tl.sum's unspecified tree.
++        pairs = tl.reshape(contrib, (BLOCK_M, BLOCK_N, 2, 2))
++        p01, p23 = tl.split(pairs)
++        b0, b1 = tl.split(p01)
++        b2, b3 = tl.split(p23)
++        out_val = (((b0 + b1) + b2) + b3) * inv_hc
++    else:
++        contrib_r = tl.reshape(contrib, (BLOCK_M, BLOCK_N, HC_))
++        out_val = tl.sum(contrib_r, axis=2) * inv_hc
++    tl.store(
++        out_ptr + offs_m[:, None] * hs + offs_hs[None, :],
++        out_val.to(out_ptr.dtype.element_ty),
++        mask=m_mask[:, None],
++    )
++
++
++def permute_hc_mix_up_weight(w_up: torch.Tensor, hc: int) -> torch.Tensor:
++    """[hc*hs, lowrank] branch-major -> [hs*hc, lowrank] interleaved.
++
++    Row ``hs_i*hc + g`` of the result holds branch ``g``, position ``hs_i``
++    of the original weight, so one gemm-n tile spans all branches of a
++    contiguous hidden slice and the epilogue reduces locally.
++    """
++    hc_count, hs = hc, w_up.shape[0] // hc
++    return (
++        w_up.view(hc_count, hs, -1)
++        .permute(1, 0, 2)
++        .reshape(hs * hc_count, -1)
++        .contiguous()
++    )
++
++
++def fused_hc_mix_up_epilogue_supported(
++    hyper_input_normed: torch.Tensor, w_up: torch.Tensor, hc: int
++) -> bool:
++    from sglang.srt.environ import envs
++
++    if not envs.SGLANG_HC_MIX_PREFILL_FUSED.get():
++        return False
++    if w_up.shape[0] % hc:
++        return False
++    hs = w_up.shape[0] // hc
++    return (
++        hyper_input_normed.is_cuda
++        and hyper_input_normed.dtype in (torch.bfloat16, torch.float16)
++        and hyper_input_normed.dim() == 2
++        and hyper_input_normed.shape[0] >= _HC_MIX_UP_EPILOGUE_MIN_ROWS
++        and hs % _HC_MIX_UP_EPILOGUE_BLOCK_N == 0
++        and hyper_input_normed.shape[1] == w_up.shape[0]
++        and w_up.is_contiguous()
++        and hyper_input_normed.is_contiguous()
++    )
++
++
++def fused_hc_mix_up_epilogue(
++    hyper_input_normed: torch.Tensor,
++    t: torch.Tensor,
++    w_up_interleaved: torch.Tensor,
++    hc: int,
++    hs: int,
++) -> torch.Tensor:
++    """Up projection + sigmoid/mul/branch-mean epilogue in one kernel."""
++    rows = hyper_input_normed.shape[0]
++    lowrank = t.shape[1]
++    out = torch.empty(
++        (rows, hs), dtype=hyper_input_normed.dtype, device=hyper_input_normed.device
++    )
++    grid = (
++        triton.cdiv(rows, _HC_MIX_UP_EPILOGUE_BLOCK_M),
++        triton.cdiv(hs, _HC_MIX_UP_EPILOGUE_BLOCK_N),
++    )
++    _hc_mix_up_epilogue_kernel[grid](
++        hyper_input_normed,
++        t,
++        w_up_interleaved,
++        out,
++        rows,
++        lowrank,
++        hs,
++        BLOCK_M=_HC_MIX_UP_EPILOGUE_BLOCK_M,
++        BLOCK_N=_HC_MIX_UP_EPILOGUE_BLOCK_N,
++        BLOCK_K=_HC_MIX_UP_EPILOGUE_BLOCK_K,
++        HC_=hc,
++        inv_hc=1.0 / hc,
++        num_warps=_HC_MIX_UP_EPILOGUE_WARPS,
++        num_stages=_HC_MIX_UP_EPILOGUE_STAGES,
++    )
++    return out
 +
 +@triton.jit
 +def _grid_barrier(counter_ptr, num_ctas):
@@ -10125,10 +10305,10 @@ index 0000000000..36d7c762b0
 +    return out
 diff --git a/python/sglang/srt/layers/hyperconnection.py b/python/sglang/srt/layers/hyperconnection.py
 new file mode 100644
-index 0000000000..37d24cc111
+index 0000000000..622772da3e
 --- /dev/null
 +++ b/python/sglang/srt/layers/hyperconnection.py
-@@ -0,0 +1,348 @@
+@@ -0,0 +1,377 @@
 +from typing import Optional
 +
 +import msgspec
@@ -10136,7 +10316,13 @@ index 0000000000..37d24cc111
 +import torch.nn as nn
 +import torch.nn.functional as F
 +
-+from sglang.srt.layers.hc_mix_triton import fused_hc_mix, fused_hc_mix_supported
++from sglang.srt.layers.hc_mix_triton import (
++    fused_hc_mix,
++    fused_hc_mix_supported,
++    fused_hc_mix_up_epilogue,
++    fused_hc_mix_up_epilogue_supported,
++    permute_hc_mix_up_weight,
++)
 +
 +
 +class HyperConnectionConfig(msgspec.Struct, frozen=True):
@@ -10299,6 +10485,7 @@ index 0000000000..37d24cc111
 +                and lowrank % 8 == 0
 +            )
 +            self._mix_up_weight_padded = None
++            self._mix_up_weight_interleaved = None
 +
 +
 +        if use_combine:
@@ -10410,6 +10597,28 @@ index 0000000000..37d24cc111
 +                hyper_input_normed,
 +                self.input_mix_weight_down.weight,
 +                self.input_mix_weight_up.weight,
++                self.hc_count,
++                self.hidden_size,
++            ).to(self.params_dtype)
++        elif fused_hc_mix_up_epilogue_supported(
++            hyper_input_normed,
++            self.input_mix_weight_up.weight,
++            self.hc_count,
++        ):
++            if self._mix_up_weight_interleaved is None:
++                self._mix_up_weight_interleaved = permute_hc_mix_up_weight(
++                    self.input_mix_weight_up.weight.data, self.hc_count
++                )
++            t = F.silu(
++                F.linear(
++                    hyper_input_normed, self.input_mix_weight_down.weight
++                )
++                / self.hc_count
++            )
++            mixed_input = fused_hc_mix_up_epilogue(
++                hyper_input_normed,
++                t,
++                self._mix_up_weight_interleaved,
 +                self.hc_count,
 +                self.hidden_size,
 +            ).to(self.params_dtype)
@@ -17718,10 +17927,10 @@ index 3e909fa958..631effd013 100644
          (1, 128, 4, True, True, torch.float32),
 diff --git a/test/registered/kernels/test_hc_mix_triton.py b/test/registered/kernels/test_hc_mix_triton.py
 new file mode 100644
-index 0000000000..09ec4c2be6
+index 0000000000..0bc1a360a2
 --- /dev/null
 +++ b/test/registered/kernels/test_hc_mix_triton.py
-@@ -0,0 +1,87 @@
+@@ -0,0 +1,138 @@
 +import sys
 +
 +import pytest
@@ -17730,8 +17939,12 @@ index 0000000000..09ec4c2be6
 +
 +from sglang.srt.layers.hc_mix_triton import (
 +    _FUSED_MIX_MAX_ROWS,
++    _HC_MIX_UP_EPILOGUE_MIN_ROWS,
 +    fused_hc_mix,
 +    fused_hc_mix_supported,
++    fused_hc_mix_up_epilogue,
++    fused_hc_mix_up_epilogue_supported,
++    permute_hc_mix_up_weight,
 +)
 +from sglang.test.ci.ci_register import register_cuda_ci
 +
@@ -17805,6 +18018,53 @@ index 0000000000..09ec4c2be6
 +def test_fused_hc_mix_gate_rejects_prefill_rows():
 +    x, w_down, w_up = _make_inputs(_FUSED_MIX_MAX_ROWS + 1, torch.bfloat16)
 +    assert not fused_hc_mix_supported(x, w_down, w_up)
++
++
++
++@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
++@pytest.mark.parametrize(
++    "num_tokens",
++    [_HC_MIX_UP_EPILOGUE_MIN_ROWS, 2048, 8192, 8192 + 64],
++)
++def test_up_epilogue_matches_compiled_chain_semantics(dtype, num_tokens):
++    """The fused kernel must match the reference chain the model actually
++    runs: the up projection materializes logits to the model dtype at the
++    F.linear global write, then a fused fp32 sigmoid/mul/branch-mean tail
++    reads them. The first version of this kernel skipped that rounding (it
++    was *more precise*) and cost 3.8 GSM8K points; this test is the guard.
++    """
++    x, w_down, w_up = _make_inputs(num_tokens, dtype)
++    assert fused_hc_mix_up_epilogue_supported(x, w_up, HC_COUNT)
++    w_interleaved = permute_hc_mix_up_weight(w_up, HC_COUNT)
++    t = F.silu(F.linear(x, w_down) / HC_COUNT)
++    out = fused_hc_mix_up_epilogue(x, t, w_interleaved, HC_COUNT, HIDDEN_SIZE)
++    # Reference: dtype-materialized logits, fp32 fused tail, one round at
++    # the store -- i.e. the semantics of the Inductor-fused reference.
++    logits = F.linear(t, w_up)
++    ref = (
++        torch.sigmoid(logits.float()).unflatten(-1, (HC_COUNT, HIDDEN_SIZE))
++        * x.unflatten(-1, (HC_COUNT, HIDDEN_SIZE)).float()
++    ).mean(dim=-2)
++    torch.testing.assert_close(
++        out.to(torch.float64), ref.to(torch.float64), rtol=1e-2, atol=5e-3
++    )
++    # Guard the guard: the deliberately-unrounded variant must NOT match
++    # bit-for-bit on every element (i.e. this test has teeth).
++    unrounded = (
++        torch.sigmoid(
++            (
++                t.float() @ w_up.float().transpose(0, 1)
++            )
++        )
++        .unflatten(-1, (HC_COUNT, HIDDEN_SIZE))
++        * x.unflatten(-1, (HC_COUNT, HIDDEN_SIZE)).float()
++    ).mean(dim=-2)
++    assert not torch.equal(out, unrounded.to(out.dtype))
++
++
++def test_up_epilogue_gate_rejects_small_rows():
++    x, w_down, w_up = _make_inputs(_FUSED_MIX_MAX_ROWS + 1, torch.bfloat16)
++    assert not fused_hc_mix_up_epilogue_supported(x, w_up, HC_COUNT)
 +
 +
 +if __name__ == "__main__":
@@ -21453,6 +21713,88 @@ index 0000000000..c95975adb6
 +
 +if __name__ == "__main__":
 +    unittest.main()
+diff --git a/test/registered/unit/layers/attention/test_qsa_row_to_request.py b/test/registered/unit/layers/attention/test_qsa_row_to_request.py
+new file mode 100644
+index 0000000000..b0b5588e34
+--- /dev/null
++++ b/test/registered/unit/layers/attention/test_qsa_row_to_request.py
+@@ -0,0 +1,76 @@
++"""QSA speculative row-to-request mapping uses the CPU mirror sync-free.
++
++``_speculative_row_to_request`` builds the token-row -> request index map for
++TARGET_VERIFY / DRAFT_EXTEND_V2 batches. The row total it needs must come
++from ``forward_batch.extend_seq_lens_cpu`` (maintained in lockstep with the
++device tensor by the spec batch builders and DP padding) instead of a
++``.item()`` readback that stalls the stream on every draft-extend.
++"""
++
++import sys
++from types import SimpleNamespace
++
++import pytest
++import torch
++
++from sglang.srt.layers.attention.qwen_sparse_attn_backend import (
++    QwenSparseAttnBackend,
++)
++from sglang.test.ci.ci_register import register_cuda_ci
++
++register_cuda_ci(est_time=10, stage="base-b-kernel-unit", runner_config="1-gpu-large")
++
++pytestmark = pytest.mark.skipif(
++    not torch.cuda.is_available(), reason="requires CUDA tensors"
++)
++
++
++def _forward_batch(extend_seq_lens, extend_seq_lens_cpu, num_reqs):
++    device = "cuda"
++    return SimpleNamespace(
++        req_pool_indices=torch.arange(num_reqs, dtype=torch.int64, device=device),
++        extend_seq_lens=extend_seq_lens,
++        extend_seq_lens_cpu=extend_seq_lens_cpu,
++    )
++
++
++def test_row_to_request_prefers_cpu_mirror_and_matches_fallback():
++    # Draft-extend shape: 4 rows per request (uniform), plus a DP-padded
++    # zero-width tail request on both mirrors.
++    lens = torch.tensor([4, 4, 4, 4, 0], dtype=torch.int32, device="cuda")
++    batch = _forward_batch(lens, [4, 4, 4, 4, 0], num_reqs=5)
++    mapped = QwenSparseAttnBackend._speculative_row_to_request(batch, 64)
++    assert mapped.tolist() == [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3] + [0] * 48
++
++
++def test_row_to_request_variable_lengths_match_gpu_fallback():
++    lens = torch.tensor([2, 3, 1], dtype=torch.int32, device="cuda")
++    with_mirror = _forward_batch(lens, [2, 3, 1], num_reqs=3)
++    without_mirror = _forward_batch(lens, None, num_reqs=3)
++    mapped_mirror = QwenSparseAttnBackend._speculative_row_to_request(with_mirror, 8)
++    mapped_fallback = QwenSparseAttnBackend._speculative_row_to_request(
++        without_mirror, 8
++    )
++    expected = [0, 0, 1, 1, 1, 2, 0, 0]
++    assert mapped_mirror.tolist() == expected
++    assert mapped_fallback.tolist() == expected
++
++
++def test_row_to_request_short_cpu_mirror_falls_back_to_gpu():
++    # A mirror shorter than the batch must not be trusted: fall back to the
++    # device readback rather than truncating the mapping.
++    lens = torch.tensor([4, 4], dtype=torch.int32, device="cuda")
++    batch = _forward_batch(lens, [4], num_reqs=2)
++    mapped = QwenSparseAttnBackend._speculative_row_to_request(batch, 8)
++    assert mapped.tolist() == [0, 0, 0, 0, 1, 1, 1, 1, 0, 0][:8]
++
++
++def test_row_to_request_overlong_mapping_raises():
++    lens = torch.tensor([4, 4], dtype=torch.int32, device="cuda")
++    batch = _forward_batch(lens, [4, 4], num_reqs=2)
++    with pytest.raises(ValueError, match="fewer than the extend mapping"):
++        QwenSparseAttnBackend._speculative_row_to_request(batch, 4)
++
++
++if __name__ == "__main__":
++    sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/unit/layers/moe/test_flashinfer_a2a_wide_ep.py b/test/registered/unit/layers/moe/test_flashinfer_a2a_wide_ep.py
 index 16197d8432..4f9af1bc08 100644
 --- a/test/registered/unit/layers/moe/test_flashinfer_a2a_wide_ep.py
