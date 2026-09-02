@@ -103,6 +103,32 @@ outside the converter's own record.**
   32ch 1.370 ms on the 41.9 MB AR; nthreads 256 ≈ 128 < 512. 16/256 is the
   optimum; nothing further there.
 
+- **`TORCH_BLAS_PREFER_CUBLASLT=1` + `CUBLASLT_WORKSPACE_SIZE=32768`**
+  (tested 09-03, rejected): interleaved same-window A/B on identical
+  tree/tactics/cache — C16 step time 47.2–48.5 ms (LT, n=4) vs 47.8–48.3
+  (control, n=3): **neutral**. Prefill 8K/32K: 502.5/2 023.7 vs
+  503.7/2 028.3 ms: **neutral**. C1 step: 13.90/13.97 (LT) vs 13.61/13.70
+  (control): **possible ~2% cost**. The dispatch switch itself works
+  (torch 2.13 `preferred_blas_library` flips Cublas→Cublaslt) — cuBLASLt
+  simply has no better skinny-M bf16 kernels for SM120. The profile's
+  3.38-vs-2.12 ms/step gap in the dense bf16 GEMMs remains real but is not
+  reachable via this knob; it needs an SM120-native kernel.
+
+### Environment gotchas on this GPUhub box (09-03)
+
+- **cgroup memory cap = 220 GiB** (host shows 1 TB — `free` lies). Both
+  models' page caches resident (173 GB FP8 + 137 GB NVFP4) OOM-kill rank 0
+  (SIGKILL, exit −9) at launch. `drop_caches` is permission-denied; evict
+  the *other* model's pages with `posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED)`
+  over its files (172.8 GiB evicted → launch fine). Check
+  `/sys/fs/cgroup/memory.current` before big loads.
+- **Slow tenant-correlated drift is real**: C1 step time 12.94 ms (03:35) →
+  13.66 ms (06:53) across ALL arms (+5.5%) on identical config+cache.
+  Same-window interleaving is mandatory on this machine; cross-hour
+  comparisons are confounded. Fast run-to-run C16 scatter is NOT drift —
+  it is the accept-length lottery (step-time spread ±1.3% when four raw-tput
+  replicates span ±4%).
+
 ## What we likely got wrong (honest assessment)
 
 1. **Accuracy attribution was late.** Single n=128 runs with a harness whose
@@ -131,24 +157,18 @@ outside the converter's own record.**
 
 ## Untested ideas (ranked, for the retry)
 
-1. **`TORCH_BLAS_PREFER_CUBLASLT=1` (+ `CUBLASLT_WORKSPACE_SIZE`)** — the
-   decode profile's #1 candidate, never run: cuBLAS picks SM80-wmma
-   fallbacks for every skinny bf16 GEMM; measured 3.38 ms/step vs a
-   2.12 ms weight-traffic floor ⇒ **up to +9% C1 decode** for an env var.
-   Test first.
-2. **QSA draft-extend host sync removal** —
-   `qwen_sparse_attn_backend._speculative_row_to_request` does
-   `int(repeats.sum().item())` per draft-extend: 76–182 ms full-stream sync
-   per 8K chunk, currently hidden behind queued work. Latent but real;
-   `extend_seq_lens_cpu` already exists as the CPU-mirror idiom.
-3. **QSA chunk-prefill BLOCK_N table** — non-H20 devices inherit a
+1. ~~`TORCH_BLAS_PREFER_CUBLASLT=1`~~ — **tested 09-03, rejected**: see
+   Failed ideas. Next up: **QSA draft-extend host sync removal** (code;
+   `extend_seq_lens_cpu` CPU-mirror idiom already exists), then the
+   HC-fusion one-line fix from the Addendum, then QSA BLOCK_N tuning.
+2. **QSA chunk-prefill BLOCK_N table** — non-H20 devices inherit a
    Hopper-era `_L20_CONFIGS` table; (16,1,2) at 8 192 tokens; sweep
    (32,4,2)/(32,4,3)/(64,2,2). Ceiling ~4–6 ms/chunk (~1%).
-4. **NCCL_P2P_LEVEL=SYS + NCCL_CUMEM_ENABLE=1** (must be pre-set in the
+3. **NCCL_P2P_LEVEL=SYS + NCCL_CUMEM_ENABLE=1** (must be pre-set in the
    launching shell — SGLang clobbers it otherwise): flips transport from
    host-staged SHM to P2P/CUMEM. Big-message upside ≈0 (both at the wire
    floor) but removes proxy hops for small collectives. Low priority.
-5. **Tactic-draw selection for accuracy, not just speed.** Evidence that
+4. **Tactic-draw selection for accuracy, not just speed.** Evidence that
    different valid tactic draws correlate with different greedy behavior
    (style-flip modes). If the official-protocol gap turns out
    stack-numerics-related, try pinning tactics to the draw that reproduces
