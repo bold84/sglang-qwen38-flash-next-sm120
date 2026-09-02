@@ -159,16 +159,24 @@ outside the converter's own record.**
 
 1. ~~`TORCH_BLAS_PREFER_CUBLASLT=1`~~ — **tested 09-03, rejected** (see
    Failed ideas). ~~QSA draft-extend host sync removal~~ — **landed 09-03**
-   (`perf(qsa)` @ `3fa2e31651` on the retry branch): the row total now comes
-   from `extend_seq_lens_cpu` (lockstep mirror; `.item()` kept only as the
-   gpu_only fallback), unit-tested for mirror/fallback equivalence. Interleaved
-   A/B: wall-clock **neutral** at 8K-chunk C1 (505.4 vs 507.6 ms median
-   TTFT), 32K/131K identical, C1 step 13.65 ms — the stall hides behind
-   queued work in this shape, as profiled. Kept: last stream sync in the
-   speculative metadata path; pays at smaller chunks / higher prefill
-   concurrency / after AR wins. Next: the **HC-fusion one-line fix** from
-   the Addendum (the only candidate with a concrete −3% TTFT attached),
-   then QSA BLOCK_N tuning.
+   (`perf(qsa)` @ `3fa2e31651`): wall-neutral at 8K chunks (stall hides
+   behind queued work); kept as the last-stream-sync removal.
+   ~~HC-fusion one-line fix~~ — **landed 09-03** (`feat(hc-mix)` @
+   `4fe45c3dba`): the up-GEMM epilogue is back with the numerics contract
+   fixed (fp32 accumulator rounded to the model dtype at the reference
+   F.linear boundary before the fp32 sigmoid/mul/mean; HC=4 branch
+   reduction pinned to Inductor's sequential order via tl.split). New
+   `matches_compiled_chain_semantics` unit test guards the contract and
+   self-checks that the unrounded variant fails it. Prefill vs same-draw
+   control: 8K 486.7–497.8 vs 504.9–505.9 ms (**−3%**), 32K 1932 vs 2020
+   (**−4.3%**). 5×256 GSM8K gate vs fresh-instance control (pinned
+   tactics, frozen harness): fused-on 0.9375–0.9492 (mean 0.9453) vs
+   fused-off 0.8750–0.8984 (mean 0.8812) — **above control 5/5**; the
+   rejection rule (consistently below) does not trigger. The +6.4pt is
+   more plausibly register stabilization than kernel gain: the fused
+   kernel is deterministic where the torch.compile path it replaces does
+   instance-varying inductor autotuning; accepted on the unit-level
+   semantics guarantee + the sign test, with the lottery caveat recorded.
 2. **QSA chunk-prefill BLOCK_N table** — non-H20 devices inherit a
    Hopper-era `_L20_CONFIGS` table; (16,1,2) at 8 192 tokens; sweep
    (32,4,2)/(32,4,3)/(64,2,2). Ceiling ~4–6 ms/chunk (~1%).
