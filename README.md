@@ -1,22 +1,24 @@
 # SGLang Qwen3.8-Flash-Next SM120
 
-Reproducible SGLang container source for the official
-[`Qwen/Qwen3.8-Flash-Next-FP8`](https://huggingface.co/Qwen/Qwen3.8-Flash-Next-FP8)
+Reproducible SGLang container source for the ModelOpt NVFP4
+[`RadixArk/Qwen3.8-Flash-Next-NVFP4`](https://huggingface.co/RadixArk/Qwen3.8-Flash-Next-NVFP4)
 checkpoint on two NVIDIA RTX PRO 6000 Blackwell GPUs (SM120).
 
-This is an experimental `v0.1.0-rc.9` source release. The exact candidate has
-passed dual-SM120 startup, text, reasoning, tool-call, image-input, decode,
-cold-prefill, full GSM8K, and the five-run supported-concurrency publication
-panel. C32 is explicitly unsupported by the tested token-pool capacity rather
-than reported as a timing result. Near-native-context and non-speculative
-panels have not been completed, so there is no stable or cross-hardware
-performance claim yet.
+This is an experimental `v0.1.0-rc.10` source release. The NVFP4 candidate
+has passed dual-SM120 startup, text, reasoning, tool-call, decode,
+cold-prefill through native 262K context, and GSM8K screening; its
+interleaved same-night validation is recorded in [`BENCHMARKS.md`](BENCHMARKS.md).
+C32 is explicitly unsupported by the tested token-pool capacity rather than
+reported as a timing result. The five-run publication panel on this page
+refers to the rc.9 FP8 profile; the NVFP4 publication panel is pending, so
+there is no stable or cross-hardware performance claim yet.
 
 ## Tested configuration
 
 - Linux/amd64 and 2x RTX PRO 6000 Blackwell (SM120).
-- TP=2 and EP=2. TP2/EP1 is invalid for the checkpoint's 640-wide experts and
-  128-column FP8 quantization blocks.
+- TP=2 and EP=2. TP2/EP1 is invalid for the checkpoint's 640-wide experts.
+- ModelOpt NVFP4 experts served by the FlashInfer CUTLASS fused-MoE runner
+  with a measured per-GPU tactic cache; dense projections remain BF16.
 - Native 262,144-token context.
 - NEXTN MTP-3: three steps, top-k 1, four draft tokens.
 - FlashInfer GDN prefill/decode and QSA sparse attention.
@@ -70,15 +72,15 @@ the exact source bundle locally:
 docker build --platform linux/amd64 \
   --build-arg IMAGE_SOURCE=https://github.com/ormandj/sglang-qwen38-flash-next-sm120 \
   --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" \
-  -t sglang-qwen38-flash-next-sm120:v0.1.0-rc.9 .
+  -t sglang-qwen38-flash-next-sm120:v0.1.0-rc.10 .
 ```
 
-Then point the launcher at the downloaded FP8 snapshot and a persistent,
+Then point the launcher at the downloaded NVFP4 snapshot and a persistent,
 image-specific compilation cache:
 
 ```bash
-export MODEL_DIR=/models/Qwen/Qwen3.8-Flash-Next-FP8
-export CACHE_DIR=/srv/cache/sglang-qwen38-flash-next-sm120-v8
+export MODEL_DIR=/models/RadixArk/Qwen3.8-Flash-Next-NVFP4
+export CACHE_DIR=/srv/cache/sglang-qwen38-flash-next-sm120-v9
 ./examples/serve-qwen38-flash-next.sh
 ```
 
@@ -104,5 +106,5 @@ License 1.0; see [`NOTICE.md`](NOTICE.md).
 
 ## Scope limits
 
-Only SM120 has been tested. This release does not claim SM121, arm64, NVFP4,
+Only SM120 has been tested. This release does not claim SM121, arm64, FP8,
 1M YaRN, or HiCache compatibility.

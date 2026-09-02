@@ -3,23 +3,23 @@
   "release": {
     "manifest": "release.json",
     "version": "0.1.0",
-    "candidate": 9,
-    "candidate_tag": "v0.1.0-rc.9",
+    "candidate": 10,
+    "candidate_tag": "v0.1.0-rc.10",
     "stable_tag": "v0.1.0",
-    "cache_schema": "v8"
+    "cache_schema": "v9"
   },
   "image": {
     "repository": "sglang-qwen38-flash-next-sm120",
-    "tag": "v0.1.0-rc.9",
+    "tag": "v0.1.0-rc.10",
     "platform": "linux/amd64",
     "containerfile_target": "runtime"
   },
   "model": {
-    "repository": "Qwen/Qwen3.8-Flash-Next-FP8",
-    "revision": "bcd9f01ddc9cff2316eb84281bebcd5b058bddce",
+    "repository": "RadixArk/Qwen3.8-Flash-Next-NVFP4",
+    "revision": "7b719225242aacd3dbd3f9407468c2ee9a9d2594",
     "architecture": "Qwen4ExpForConditionalGeneration",
     "model_type": "qwen4_exp",
-    "storage_bytes": 185553536918,
+    "storage_bytes": 137613118685,
     "native_context_length": 262144,
     "served_model_name": "qwen38-flash-next-sm120"
   },
@@ -42,13 +42,13 @@
     },
     {
       "arg": "QWEN38_RELEASE_CANDIDATE",
-      "value": "9",
-      "description": "Ninth private dual-SM120 candidate; rebuilds the retained MTP-3 profile after a same-session refresh of SGLang and FlashInfer main."
+      "value": "10",
+      "description": "Tenth private dual-SM120 candidate: NVFP4 quantization on the refreshed current main with the SM120 performance profile."
     },
     {
       "arg": "QWEN38_CACHE_SCHEMA",
-      "value": "v8",
-      "description": "Fresh compiled-kernel cache namespace for the latest-main SGLang and FlashInfer candidate."
+      "value": "v9",
+      "description": "Fresh compiled-kernel and FlashInfer tactic cache namespace for the NVFP4 runner (flashinfer_cutlass MoE)."
     },
     {
       "arg": "QWEN38_SGLANG_BASE",
@@ -62,12 +62,12 @@
     },
     {
       "arg": "QWEN38_SGLANG_MAIN_HEAD",
-      "value": "7f27bf470824f452a34e866d22ab5e332a23e26f",
-      "description": "Current upstream SGLang main fetched immediately before candidate composition."
+      "value": "99b910955377375a1385122680e0daefcf706f79",
+      "description": "Current upstream SGLang main the NVFP4 integration branch was rebased onto."
     },
     {
       "arg": "QWEN38_SGLANG_MAIN_TREE",
-      "value": "9a15203d2cc3b256f78a96a6617ee5c783e1b1c1",
+      "value": "62beff1e9ffa34667f6e5edd9552f2f7bd41f34a",
       "description": "Tree of the current upstream SGLang main commit."
     },
     {
@@ -82,18 +82,18 @@
     },
     {
       "arg": "QWEN38_SGLANG_INTEGRATION_HEAD",
-      "value": "b03fdaa5c4bb011908e9359c498dbe20a5e05deb",
-      "description": "Reviewed local integration head: current main plus Qwen PR #36497, PR #36556, and both MTP current-main fixes."
+      "value": "0ae7c39bf357688591207213c22e81c3d7c698d6",
+      "description": "Reviewed local integration head: refreshed main plus the Qwen/QSA upstream chain, the ported SM120 performance work, and the NVFP4 runtime candidates."
     },
     {
       "arg": "QWEN38_SGLANG_EFFECTIVE_TREE",
-      "value": "2bf157ed74501598305c55f478025ea1f4d80ec8",
-      "description": "Final host-optimized SGLang tree reproduced from current main and the archived integration patch."
+      "value": "b20d07d3c73078980dc1d078b083efc7a8725dc6",
+      "description": "Final host-optimized NVFP4 SGLang tree reproduced from current main and the archived integration patch."
     },
     {
       "arg": "QWEN38_MODEL_REVISION",
-      "value": "bcd9f01ddc9cff2316eb84281bebcd5b058bddce",
-      "description": "Immutable Hugging Face revision of the official FP8 checkpoint."
+      "value": "7b719225242aacd3dbd3f9407468c2ee9a9d2594",
+      "description": "Immutable Hugging Face revision of the NVFP4 (ModelOpt FP4) checkpoint."
     },
     {
       "arg": "QWEN38_FLASHINFER_VERSION",
@@ -113,35 +113,70 @@
   ],
   "integration": {
     "sglang": {
-      "base": "7f27bf470824f452a34e866d22ab5e332a23e26f",
-      "head": "b03fdaa5c4bb011908e9359c498dbe20a5e05deb",
+      "base": "99b910955377375a1385122680e0daefcf706f79",
+      "head": "0ae7c39bf357688591207213c22e81c3d7c698d6",
       "upstream_pr_head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
-      "effective_tree": "2bf157ed74501598305c55f478025ea1f4d80ec8",
+      "effective_tree": "b20d07d3c73078980dc1d078b083efc7a8725dc6",
       "commits": [
         {
           "source": "sgl-project/sglang#36497",
           "source_head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
-          "subject": "Introduce Qwen 3.8 Flash Next; conflict-resolved onto current main"
+          "subject": "Introduce Qwen 3.8 Flash Next; conflict-resolved onto refreshed current main"
         },
         {
-          "source": "local SM120 runtime integration after upstream audit",
-          "source_head": "3e4519023143c2ba9dc8ad042603c7c52da89a4b",
-          "subject": "Enable Qwen SM120 current-main runtime"
+          "source": "sgl-project/sglang#36649",
+          "source_head": "541898bba481f86c9070f5cdb1be3283a7066440",
+          "subject": "Enable trtllm-gen sparse decode on sm_121 (GB10 / DGX Spark)"
         },
         {
-          "source": "local current-main compatibility fix after live MTP startup",
-          "source_head": "58d92af13835d40ec8f7857fffbdd69653a967bd",
-          "subject": "Fix Qwen4 MTP parallel config access"
+          "source": "sgl-project/sglang#36772",
+          "source_head": "354379acd11413b0e40e26e7e97352623f58a6d6",
+          "subject": "fix(qwen4): accept qwen_sparse_attention layer type alias"
         },
         {
-          "source": "local conflict-resolution fix after the first live MTP request",
-          "source_head": "7cc81dd9674d936a38ce4fabba9f5a0fe60aad14",
-          "subject": "Fix Qwen MTP runtime context import"
+          "source": "sgl-project/sglang#36667",
+          "source_head": "c963bda8cf249af214134d703ca1bbf02179eccd",
+          "subject": "chore: make qwen4-main-squashed pre-commit clean"
         },
         {
-          "source": "sgl-project/sglang#36556",
-          "source_head": "dac5523d1e5d2f4297fec40ef02fc76fb0f662d1",
-          "subject": "Use the current upstream SM120 QSA resolver and architecture-owned FA4 fallback"
+          "source": "sgl-project/sglang#36806",
+          "source_head": "c8dbc93c99137fac56addace1857029978fe3914",
+          "subject": "fix(qsa): route exact SM120 to FlashInfer sparse decode"
+        },
+        {
+          "source": "sgl-project/sglang#36845",
+          "source_head": "f8af2727db982189f3293509111aa7fa4863665e",
+          "subject": "fix(qsa): restore SM121 correctness with Humanize and Kernel Design Agent"
+        },
+        {
+          "source": "local refreshed-main integration",
+          "source_head": "aa05e90242bda1f5f53dbc19683b5b7023aab16c",
+          "subject": "upd"
+        },
+        {
+          "source": "local refreshed-main integration",
+          "source_head": "f824ccf532c205114cba3dfd2f9a5e5189d0a9f3",
+          "subject": "upd"
+        },
+        {
+          "source": "local port of the rc.9 FP8 SM120 performance bundle",
+          "source_head": "3169f2c129ed9fbf1b199a0beeb47c574779b4d7",
+          "subject": "Port validated SM120 performance optimizations"
+        },
+        {
+          "source": "local QSA speculative-decode correctness fix",
+          "source_head": "d6335b05f6685ab3e81abe42309494d7ffcfd079",
+          "subject": "fix(qsa): support EAGLE draft-extend row bounds"
+        },
+        {
+          "source": "local QSA compressed-addressing correctness fix",
+          "source_head": "687d2f4ab532a0e0375065bafb4cf985c1bd1046",
+          "subject": "fix(qsa): mask padded compression plan rows"
+        },
+        {
+          "source": "local NVFP4 runtime enablement and tuning",
+          "source_head": "0ae7c39bf357688591207213c22e81c3d7c698d6",
+          "subject": "feat(nvfp4): SM120 default backend resolution, cutlass prefill path, extend-bucket autotune"
         }
       ]
     },
@@ -153,24 +188,42 @@
       "install": "exact non-editable source install with BUILD_NVEP=0 plus matching cubin package from the same checkout; base 0.6.17 cubin and JIT cache removed"
     }
   },
+  "runtime_profile": {
+    "moe_runner_backend": "flashinfer_cutlass",
+    "quantization": "modelopt_fp4",
+    "flashinfer_autotune_seed": {
+      "path": "assets/flashinfer-autotune/0.6.18/sm120/bd64fcf5b246da26/rank_tp0_pp0_dp0.json",
+      "cache_key": "bd64fcf5b246da26",
+      "key_inputs": "model_path=/models/Qwen/Qwen3.8-Flash-Next-NVFP4, dtype=torch.bfloat16, quantization=modelopt_fp4, moe_runner_backend=flashinfer_cutlass, tp=2, pp=1, attn_dp=1, ep=2, hf_config=Qwen4ExpConfig, skip_ops=none",
+      "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "description": "Per-GPU measured FlashInfer CUTLASS MoE tactics for the NVFP4 runner, including extend/prefill buckets up to the 16,384-token tuning ceiling; the FP8 release's device-named Triton tile JSONs have no NVFP4 counterpart because flashinfer_cutlass owns this path on SM120."
+    },
+    "launcher_environment": {
+      "NCCL_PROTO": "Simple",
+      "NCCL_MIN_NCHANNELS": "16",
+      "NCCL_MAX_NCHANNELS": "16",
+      "NCCL_NTHREADS": "256",
+      "SGLANG_FLASHINFER_AUTOTUNE_EXTEND": "1"
+    }
+  },
   "patches": [
     {
       "repository": "sglang",
       "order": 1,
-      "path": "patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.9.patch",
-      "sha256": "6c5cc32e818373d8cc949d846baba31577f71479b0a390ce79588f99a1047429",
-      "source": "Current-main integration of sgl-project/sglang#36497 and #36556, MTP fixes, and accuracy-preserving SM120 performance kernels",
-      "source_head": "b03fdaa5c4bb011908e9359c498dbe20a5e05deb"
+      "path": "patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.10.patch",
+      "sha256": "d7d838990f7877444da2c7acc7fb50cb379cea8a55945b968204068f7ebc1bcd",
+      "source": "Refreshed-current-main integration of sgl-project/sglang#36497, #36556, #36649, #36667, #36772, #36806, and #36845, the ported SM120 performance kernels, QSA speculative-decode fixes, and the NVFP4 flashinfer_cutlass enablement with extend-bucket autotuning",
+      "source_head": "0ae7c39bf357688591207213c22e81c3d7c698d6"
     }
   ],
   "verification": {
     "sglang_repository": "https://github.com/sgl-project/sglang.git",
     "flashinfer_repository": "https://github.com/flashinfer-ai/flashinfer.git",
     "evidence_repository": "https://github.com/ormandj/sglang-qwen38-flash-next-sm120",
-    "upstream_main_observed": "7f27bf470824f452a34e866d22ab5e332a23e26f",
-    "upstream_main_observed_at": "2026-08-26T17:44:01-05:00",
+    "upstream_main_observed": "99b910955377375a1385122680e0daefcf706f79",
+    "upstream_main_observed_at": "2026-09-02T22:10:00-05:00",
     "upstream_audit": {
-      "sglang_main_tree": "9a15203d2cc3b256f78a96a6617ee5c783e1b1c1",
+      "sglang_main_tree": "62beff1e9ffa34667f6e5edd9552f2f7bd41f34a",
       "qwen_support_pr": {
         "number": 36497,
         "head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
@@ -195,7 +248,7 @@
         "state": "open"
       },
       "merged_sm120_gdn_state_fix": {
-        "commit": "8a1e6e4e461044246739b5a1ad579c8acc556a2d",
+        "commit": "8a1e6e4e4610442467395b1ad579c8acc556a2d",
         "disposition": "retained from current main; converts SM120 prefill state/checkpoints to float32 while preserving the BF16 pool"
       },
       "merged_spec_allocation_fix": {
@@ -243,7 +296,7 @@
           "number": 4733,
           "head": "648544f72c566fe6e475c5b7ac5fae7324167369",
           "state": "open-approved",
-          "disposition": "not carried; activation primitive is not reached by the current Triton FP8 MoE route"
+          "disposition": "not carried; activation primitive is not reached by the current NVFP4 flashinfer_cutlass MoE route"
         },
         {
           "number": 4745,

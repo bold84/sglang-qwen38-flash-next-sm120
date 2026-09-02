@@ -1,16 +1,16 @@
-# Qwen3.8-Flash-Next FP8 on SGLang for RTX PRO 6000 Blackwell (SM120).
+# Qwen3.8-Flash-Next NVFP4 on SGLang for RTX PRO 6000 Blackwell (SM120).
 ARG QWEN38_RELEASE_VERSION=0.1.0
-ARG QWEN38_RELEASE_CANDIDATE=9
-ARG QWEN38_CACHE_SCHEMA=v8
+ARG QWEN38_RELEASE_CANDIDATE=10
+ARG QWEN38_CACHE_SCHEMA=v9
 ARG QWEN38_SGLANG_BASE=lmsysorg/sglang:nightly-dev-cu13-20260826-41e7612d@sha256:5f9319ef797bd258594de8f879911ffd8300f3393e1b885fedea4a9bea74294d
 ARG QWEN38_SGLANG_BASE_HEAD=41e7612dee44e262ba2f474546a5144c449c6596
-ARG QWEN38_SGLANG_MAIN_HEAD=7f27bf470824f452a34e866d22ab5e332a23e26f
-ARG QWEN38_SGLANG_MAIN_TREE=9a15203d2cc3b256f78a96a6617ee5c783e1b1c1
+ARG QWEN38_SGLANG_MAIN_HEAD=99b910955377375a1385122680e0daefcf706f79
+ARG QWEN38_SGLANG_MAIN_TREE=62beff1e9ffa34667f6e5edd9552f2f7bd41f34a
 ARG QWEN38_SGLANG_PR36497_HEAD=73a255206f916366c8d26d4022f82ddfb0ab558d
 ARG QWEN38_SGLANG_PR36556_HEAD=dac5523d1e5d2f4297fec40ef02fc76fb0f662d1
-ARG QWEN38_SGLANG_INTEGRATION_HEAD=b03fdaa5c4bb011908e9359c498dbe20a5e05deb
-ARG QWEN38_SGLANG_EFFECTIVE_TREE=2bf157ed74501598305c55f478025ea1f4d80ec8
-ARG QWEN38_MODEL_REVISION=bcd9f01ddc9cff2316eb84281bebcd5b058bddce
+ARG QWEN38_SGLANG_INTEGRATION_HEAD=0ae7c39bf357688591207213c22e81c3d7c698d6
+ARG QWEN38_SGLANG_EFFECTIVE_TREE=b20d07d3c73078980dc1d078b083efc7a8725dc6
+ARG QWEN38_MODEL_REVISION=7b719225242aacd3dbd3f9407468c2ee9a9d2594
 ARG QWEN38_FLASHINFER_VERSION=0.6.18
 ARG QWEN38_FLASHINFER_MAIN_HEAD=e4b7fa4b7c3ba5e17286d9c59f2bcf2ca07e0a6d
 ARG QWEN38_FLASHINFER_MAIN_TREE=2c9c021eb87fb09c982076b8a0b63514bc399e56
@@ -56,7 +56,7 @@ RUN set -e; \
     cd /; \
     rm -rf /tmp/flashinfer-main
 
-COPY patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.9.patch /tmp/sglang-release.patch
+COPY patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.10.patch /tmp/sglang-release.patch
 RUN set -e; cd /sgl-workspace/sglang; \
     git config --local --unset-all http.https://github.com/.extraheader || true; \
     git remote set-url origin https://github.com/sgl-project/sglang.git; \
@@ -85,6 +85,7 @@ RUN set -e; cd /sgl-workspace/sglang; \
       test/registered/unit/models/test_qwen4_exp_mtp.py; \
     uv run --no-project --python /opt/sglang/bin/python python -c "from unittest.mock import patch; import pytest; import sglang.srt.server_args as server_args_module; cuda_patch = patch.object(server_args_module, 'is_cuda', return_value=True); cuda_patch.start(); raise SystemExit(pytest.main(['-q', 'test/registered/unit/test_model_overrides.py::TestGoldenModelOverrides::test_qwen4_ple_offload_default']))"; \
     rm /tmp/sglang-release.patch
+COPY assets/flashinfer-autotune /opt/qwen38/flashinfer-autotune
 
 RUN set -e; \
     uv run --no-project --python /opt/sglang/bin/python python -c "import importlib.util; import flashinfer; import flashinfer_cubin; assert flashinfer.__version__ == '${QWEN38_FLASHINFER_VERSION}', flashinfer.__version__; assert flashinfer.__git_commit__ == '${QWEN38_FLASHINFER_MAIN_HEAD}', flashinfer.__git_commit__; assert flashinfer_cubin.__version__ == '${QWEN38_FLASHINFER_VERSION}', flashinfer_cubin.__version__; assert flashinfer_cubin.__git_version__ == '${QWEN38_FLASHINFER_MAIN_HEAD}', flashinfer_cubin.__git_version__; assert importlib.util.find_spec('flashinfer_jit_cache') is None; print('flashinfer', flashinfer.__version__, flashinfer.__git_commit__, 'cubin', flashinfer_cubin.__version__, flashinfer_cubin.__git_version__, 'jit-cache=source')"
@@ -95,7 +96,7 @@ ENV SGLANG_BUILD_COMMIT=${QWEN38_SGLANG_MAIN_HEAD} \
     FLASHINFER_BUILD_COMMIT=${QWEN38_FLASHINFER_MAIN_HEAD} \
     FLASHINFER_CUDA_ARCH_LIST=12.0f
 LABEL org.opencontainers.image.title="sglang-qwen38-flash-next-sm120" \
-      org.opencontainers.image.description="SGLang for Qwen3.8-Flash-Next FP8 on dual RTX PRO 6000 Blackwell (SM120)" \
+      org.opencontainers.image.description="SGLang for Qwen3.8-Flash-Next NVFP4 on dual RTX PRO 6000 Blackwell (SM120)" \
       org.opencontainers.image.source=${IMAGE_SOURCE} \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.version=${QWEN38_RELEASE_VERSION} \
@@ -103,7 +104,7 @@ LABEL org.opencontainers.image.title="sglang-qwen38-flash-next-sm120" \
       ai.release.candidate=rc.${QWEN38_RELEASE_CANDIDATE} \
       ai.release.cache-schema=${QWEN38_CACHE_SCHEMA} \
       ai.hardware.target-architecture="sm120" \
-      ai.model.repository="Qwen/Qwen3.8-Flash-Next-FP8" \
+      ai.model.repository="RadixArk/Qwen3.8-Flash-Next-NVFP4" \
       ai.model.revision=${QWEN38_MODEL_REVISION} \
       ai.sglang.base.head=${QWEN38_SGLANG_BASE_HEAD} \
       ai.sglang.main.head=${QWEN38_SGLANG_MAIN_HEAD} \

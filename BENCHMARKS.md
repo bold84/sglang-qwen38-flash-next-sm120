@@ -175,3 +175,61 @@ generated eight tokens from a 262,000-token prompt in 21.85 seconds, and two
 sequential 128K graph-backed requests completed without an illegal-address or
 server restart. The launcher now bounds capture at batch size 32; the state
 cache still caps this exact runtime to 27 active requests.
+
+## v0.1.0-rc.10 NVFP4 candidate
+
+The rc.10 candidate switches the bundle to the ModelOpt NVFP4 checkpoint
+(`RadixArk/Qwen3.8-Flash-Next-NVFP4@7b719225`) on refreshed SGLang main
+`99b9109553`, resolves `modelopt_fp4` to the `flashinfer_cutlass` MoE runner
+on SM120, tunes the FlashInfer CUTLASS MoE tactics through the 16,384-token
+extend ceiling, seeds those measured per-GPU tactics into the image, and pins
+NCCL to Simple/16-channel/256-thread in the launcher.
+
+Attribution protocol: earlier same-session arms (baseline at 21:22, then
+tree edits, then each env change) were single-run and straddled several hours
+of machine state, so absolute cross-era deltas were confounded. The retained
+numbers below are interleaved same-night A/B runs on one host: the pre-edit
+tree at `687d2f4ab` with the baseline tactic cache and default NCCL versus
+the final candidate tree at `0ae7c39bf3` with the tuned cache and NCCL pins.
+Both servers used identical launch arguments; the arms differ only in tree,
+tactic cache, and NCCL environment.
+
+| Workload and metric | Pre-edit config | rc.10 candidate | Change |
+|---|---:|---:|---:|
+| Cold TTFT 8K (3 reqs, C1) | 538.5 ms | 496.9 ms | -7.7% |
+| Cold TTFT 32K (3 reqs, C1) | 2,147.0 ms | 1,976.5 ms | -7.9% |
+| Cold TTFT 131K (3 reqs, C1) | 9,135.2 ms | 8,457.5 ms | -7.4% |
+| Cold TTFT 262K (3 reqs, C1) | 21,305.1 ms | 19,918.6 ms | -6.5% |
+| Prefill throughput 262K | 12,269 tok/s | 13,125 tok/s | +7.0% |
+| C16 output throughput (16x16K in, 4K out) | 906.1-943.8 tok/s | 979.3 tok/s | +3.8 to +8.1% |
+| C16 mean TPOT | 13.07 ms | 12.82 ms | -1.9% |
+| C1 verify-step time | 12.93 ms/step | 12.95 ms/step | neutral |
+
+C1 mean TPOT differences across arms tracked NEXTN acceptance-length sampling
+noise (2.87-3.10 across runs) rather than engine time; step time is the
+honest C1 signal. Within the candidate, the isolated NCCL pin effect
+(identical tree and cache) measured -3.5 to -5.3% prefill TTFT and +2.9% C16
+output; the extend-bucket tactic cache contributes the remainder of the
+prefill gain. A same-harness 128-question GSM8K A/B (8-shot CoT, greedy,
+exact match) scored 0.9375 pre-edit versus 0.9061 candidate, a 0.9-sigma
+difference of the paired binomial error, with only partial failure-list
+overlap - consistent with sampling noise, not a quality regression.
+
+### NVFP4 rejected candidates
+
+- DP-attention with the FlashInfer all-to-all dispatcher (`--dp 2
+  --enable-dp-attention --moe-a2a-backend flashinfer`) regressed C1 TPOT
+  +32% and C16 output -5.4% on this two-GPU PCIe host; rejected.
+- Retuning the persistent hyper-connection mix kernel's CTA/tile geometry:
+  every variant within 6% of the shipped 188-CTA configuration across row
+  counts 1-16; ceiling under 1% of step time, rejected as churn.
+- Porting the SM100 tcgen05 BF16 split-K GEMM family (FlashInfer PR #4266)
+  or enabling the PR4266 tuned-tactic table: the kernels require SM100/SM103
+  tcgen05 MMA that SM120 does not implement; not portable without a rewrite.
+- Enabling the GDN fused decode projection+convolution path: dormant under
+  NEXTN because target-verify never takes the decode forward mode (known
+  trap); no ITL win available without spec-decode redesign.
+
+These are single-night engineering signals on one host, not the five-run
+publication panel; the rc.9 FP8 panel remains the published reference and the
+NVFP4 image has not yet been rebuilt for the record.

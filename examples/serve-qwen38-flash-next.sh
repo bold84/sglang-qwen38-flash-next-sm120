@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Candidate serving envelope for Qwen3.8-Flash-Next FP8 on two RTX PRO 6000
+# Candidate serving envelope for Qwen3.8-Flash-Next NVFP4 on two RTX PRO 6000
 # Blackwell GPUs (SM120, TP=2). See BENCHMARKS.md for the passing gates and
 # remaining experimental scope.
 set -euo pipefail
 
-: "${MODEL_DIR:?set MODEL_DIR to the Qwen3.8-Flash-Next-FP8 snapshot directory}"
+: "${MODEL_DIR:?set MODEL_DIR to the Qwen3.8-Flash-Next-NVFP4 snapshot directory}"
 : "${CACHE_DIR:?set CACHE_DIR to a persistent, image-specific cache directory}"
 
-IMAGE=${IMAGE:-sglang-qwen38-flash-next-sm120:v0.1.0-rc.9}
+IMAGE=${IMAGE:-sglang-qwen38-flash-next-sm120:v0.1.0-rc.10}
 PORT=${PORT:-8000}
 CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0,1}
 TP_SIZE=${TP_SIZE:-2}
@@ -53,7 +53,7 @@ fi
 mkdir -p "$CACHE_DIR"
 model_dir=$(cd "$MODEL_DIR" && pwd)
 cache_dir=$(cd "$CACHE_DIR" && pwd)
-container_model_path=/models/Qwen/Qwen3.8-Flash-Next-FP8
+container_model_path=/models/Qwen/Qwen3.8-Flash-Next-NVFP4
 
 speculative_args=()
 if [[ "$NEXTN" == 1 ]]; then
@@ -65,11 +65,23 @@ if [[ "$NEXTN" == 1 ]]; then
   )
 fi
 
+# Seed the measured per-GPU FlashInfer CUTLASS MoE tactic cache (the NVFP4
+# analogue of the FP8 release's device-named Triton tile JSONs) into the
+# persistent cache volume before serving. No-clobber: a re-tuned cache wins.
+seed_autotune='set -e
+seed_src=/opt/qwen38/flashinfer-autotune/0.6.18/sm120
+seed_dst=/root/.cache/sglang/flashinfer/autotune/0.6.18/sm120
+if [ -d "$seed_src" ]; then
+  mkdir -p "$seed_dst"
+  cp -Rn "$seed_src"/. "$seed_dst"/ || true
+fi
+'
+
 # HiCache is deliberately absent from v0.1. Its Qwen hybrid-cache support and
 # dedicated PVC are a v0.2 gate, not an implicit host-path side effect.
 exec docker run --rm \
   --name "$CONTAINER_NAME" \
-  --entrypoint sglang \
+  --entrypoint bash \
   --gpus all \
   --shm-size 64g \
   --ulimit memlock=-1 \
@@ -81,25 +93,31 @@ exec docker run --rm \
   --env TORCHINDUCTOR_CACHE_DIR=/root/.cache/torchinductor \
   --env TILELANG_CACHE_DIR=/root/.cache/tilelang \
   --env TRITON_CACHE_DIR=/root/.cache/triton \
+  --env NCCL_PROTO=Simple \
+  --env NCCL_MIN_NCHANNELS=16 \
+  --env NCCL_MAX_NCHANNELS=16 \
+  --env NCCL_NTHREADS=256 \
+  --env SGLANG_FLASHINFER_AUTOTUNE_EXTEND=1 \
   "$IMAGE" \
-  serve \
-  --model-path "$container_model_path" \
+  -c "$seed_autotune
+exec sglang serve \
+  --model-path $container_model_path \
   --served-model-name qwen38-flash-next-sm120 \
-  --tp "$TP_SIZE" \
-  --ep "$EP_SIZE" \
-  --context-length "$CONTEXT_LENGTH" \
+  --tp $TP_SIZE \
+  --ep $EP_SIZE \
+  --context-length $CONTEXT_LENGTH \
   --mem-fraction-static 0.85 \
   --chunked-prefill-size 8192 \
   --linear-attn-prefill-backend flashinfer \
   --linear-attn-decode-backend flashinfer \
   --mamba-ssm-dtype bfloat16 \
   --ple-offload-embedding \
-  --max-running-requests "$MAX_RUNNING_REQUESTS" \
+  --max-running-requests $MAX_RUNNING_REQUESTS \
   --cuda-graph-max-bs 32 \
   --reasoning-parser auto \
   --tool-call-parser auto \
   --enable-metrics \
   --enable-cache-report \
-  "${speculative_args[@]+"${speculative_args[@]}"}" \
+  ${speculative_args[@]+"${speculative_args[@]}"} \
   --host 0.0.0.0 \
-  --port 8000
+  --port 8000"
