@@ -19,7 +19,7 @@ hf download RadixArk/Qwen3.8-Flash-Next-NVFP4 \
 Build the image from the repository root:
 
 ```bash
-docker build --platform linux/amd64 \
+docker build --platform linux/amd64 -f Containerfile \
   --build-arg IMAGE_SOURCE=https://github.com/ormandj/sglang-qwen38-flash-next-sm120 \
   --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" \
   -t sglang-qwen38-flash-next-sm120:v0.1.0-rc.11 .

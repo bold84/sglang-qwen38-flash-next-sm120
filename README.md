@@ -69,7 +69,7 @@ This repository does not contain model weights or a published GHCR image. Build
 the exact source bundle locally:
 
 ```bash
-docker build --platform linux/amd64 \
+docker build --platform linux/amd64 -f Containerfile \
   --build-arg IMAGE_SOURCE=https://github.com/ormandj/sglang-qwen38-flash-next-sm120 \
   --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" \
   -t sglang-qwen38-flash-next-sm120:v0.1.0-rc.11 .
