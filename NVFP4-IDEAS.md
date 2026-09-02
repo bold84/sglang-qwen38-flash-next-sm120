@@ -111,14 +111,20 @@ outside the converter's own record.**
    0.28–0.94 scatter that we initially chased as code regressions. The real
    culprit chain was tactic-lottery + brittle harness. Freeze the harness
    (persist every completion!) and pin tactics from run one.
-2. **Official-protocol gap never explained.** Full 1319-question run under
-   the converter's protocol (chat template, t0.6/p0.95, 8 192 cap, 16
-   threads) scored **93.56%** vs the official **97.27%** on our stack.
-   Binomial noise is ±0.65pt, so the −3.7pt is real, split unknown between
-   (a) grader differences (their sgl-eval vs our `####`-else-last-number;
-   several failures were classic extraction-trap questions) and (b) SM120
-   serving-stack numerics (unvalidated platform). **A retry must persist all
-   responses and split extraction-vs-model misses on day one.**
+2. **Official-protocol gap never explained — now localized to the grader,
+    not the model.** Full 1319-question runs under the converter's protocol
+    (chat template, t0.6/p0.95, 8 192 cap, seed 0, 16 threads) on this
+    machine: **NVFP4 93.56% vs FP8 93.63% — one question apart, near-identical
+    failure lists** (the same trap questions: robe, Carla, Claire, Shiela,
+    Adrien, Billy). The NVFP4 quantization is accuracy-free on our stack.
+    The shared −3.7pt vs the official 97.27% sits in the grader/protocol
+    layer: the same FP8 checkpoint scores 95.83% (AIPerf, temp 0, rc.9),
+    93.63% (our harness, t0.6), 97.27% (sgl-eval, t0.6) — a 3.6pt spread
+    across graders on identical weights. A retry should reproduce sgl-eval's
+    extraction exactly and persist all responses; expect most of the gap to
+    be systematic extraction misses, not model misses. Side result: NVFP4
+    served this workload 31% faster than FP8 (967 vs 739 tok/s) at identical
+    quality.
 3. **Shipped-too-early release attempt**: cutting rc.10 with an accuracy
    story that was still moving. Get the official-protocol
    gap to ≤1pt and explained before shipping anything.
