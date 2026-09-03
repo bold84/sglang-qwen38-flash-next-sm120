@@ -3,14 +3,14 @@
   "release": {
     "manifest": "release.json",
     "version": "0.1.0",
-    "candidate": 11,
-    "candidate_tag": "v0.1.0-rc.11",
+    "candidate": 12,
+    "candidate_tag": "v0.1.0-rc.12",
     "stable_tag": "v0.1.0",
     "cache_schema": "v9"
   },
   "image": {
     "repository": "sglang-qwen38-flash-next-sm120",
-    "tag": "v0.1.0-rc.11",
+    "tag": "v0.1.0-rc.12",
     "platform": "linux/amd64",
     "containerfile_target": "runtime"
   },
@@ -42,7 +42,7 @@
     },
     {
       "arg": "QWEN38_RELEASE_CANDIDATE",
-      "value": "11",
+      "value": "12",
       "description": "Eleventh private dual-SM120 candidate: the retry branch with the accuracy-gated HC-mix fused epilogue and sync-free QSA row mapping."
     },
     {
@@ -82,13 +82,13 @@
     },
     {
       "arg": "QWEN38_SGLANG_INTEGRATION_HEAD",
-      "value": "4fe45c3dba5ebb886173c6321316b88ae4079382",
+      "value": "b546a0ec921d023704cfd25ddadb3aa7b1772e06",
       "description": "Retry integration head: refreshed main plus Qwen/QSA chain, SM120 performance port, NVFP4 enablement, autotune digest fix, sync-free QSA row mapping, and the numerics-contract-fixed HC-mix fused epilogue."
     },
     {
       "arg": "QWEN38_SGLANG_EFFECTIVE_TREE",
-      "value": "eaa4682c92b33e90d33efc707785a7f3cde594cf",
-      "description": "Retry tree reproduced from current main and the rc.11 patch."
+      "value": "f2c096507791024caa02bcb181b6b5613ad8a341",
+      "description": "Retry tree reproduced from current main and the rc.12 patch."
     },
     {
       "arg": "QWEN38_MODEL_REVISION",
@@ -114,9 +114,9 @@
   "integration": {
     "sglang": {
       "base": "99b910955377375a1385122680e0daefcf706f79",
-      "head": "4fe45c3dba5ebb886173c6321316b88ae4079382",
+      "head": "b546a0ec921d023704cfd25ddadb3aa7b1772e06",
       "upstream_pr_head": "73a255206f916366c8d26d4022f82ddfb0ab558d",
-      "effective_tree": "eaa4682c92b33e90d33efc707785a7f3cde594cf",
+      "effective_tree": "f2c096507791024caa02bcb181b6b5613ad8a341",
       "commits": [
         {
           "source": "sgl-project/sglang#36497",
@@ -187,6 +187,11 @@
           "source": "local retry speed work",
           "source_head": "4fe45c3dba5ebb886173c6321316b88ae4079382",
           "subject": "perf(qsa) sync-free row mapping + feat(hc-mix) fixed fused epilogue"
+        },
+        {
+          "source": "qwen38-sm120-retry",
+          "source_head": "b546a0ec921d023704cfd25ddadb3aa7b1772e06",
+          "subject": "Weight-only FP8 lm_head for the NEXTN draft (SGLANG_DRAFT_FP8_HEAD); -5.2% decode step time, GSM8K-gated"
         }
       ]
     },
@@ -220,10 +225,10 @@
     {
       "repository": "sglang",
       "order": 1,
-      "path": "patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.11.patch",
-      "sha256": "955f8af111a0883db88fc0275787333e32de9b39f77ab12f185c123a46031882",
-      "source": "Retry branch: refreshed-current-main integration, SM120 performance port, NVFP4 flashinfer_cutlass enablement with extend-bucket autotuning, autotune tactic-cache digest fix, sync-free QSA speculative row mapping, numerics-contract-fixed HC-mix fused prefill epilogue",
-      "source_head": "4fe45c3dba5ebb886173c6321316b88ae4079382"
+      "path": "patches/sglang/0001-qwen38-flash-next-v0.1.0-rc.12.patch",
+      "sha256": "ed26c335d58060e87c4ea3c0630886d9bd27558cfd61b3aa64c39f7004061926",
+      "source": "Retry branch: refreshed-current-main integration, SM120 performance port, NVFP4 flashinfer_cutlass enablement with extend-bucket autotuning, autotune tactic-cache digest fix, sync-free QSA speculative row mapping, numerics-contract-fixed HC-mix fused prefill epilogue; weight-only FP8 draft lm_head",
+      "source_head": "b546a0ec921d023704cfd25ddadb3aa7b1772e06"
     }
   ],
   "verification": {

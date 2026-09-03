@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.1.0-rc.12
+
+- Weight-only FP8 clone of the shared lm_head for the NEXTN draft
+  (`SGLANG_DRAFT_FP8_HEAD=1`, wired in the launcher): the draft's 2-3
+  full-vocab GEMV passes per decode step drop from 445us to 219us each
+  (e4m3 per-row scales, exact e4m3->bf16 conversion, fp32 accumulate,
+  single bf16 rounding at the logits store). Decode step time -5.2%
+  (C1 step-proxy 12.31 vs 12.99 ms, 4/4 reps, no overlap), accept length
+  unchanged (2.83 vs 2.83). The target verify keeps the exact bf16 head,
+  so output quality is structurally untouched; gated 5x256 GSM8K at/above
+  the same-window control (0.9508 vs 0.9512).
+- Patch: sha256 ed26c335..., applies onto upstream main 99b9109553,
+  reproduces effective tree f2c0965077.
+
 ## v0.1.0-rc.11
 
 - Rebase the release onto the retry branch: sync-free QSA speculative row

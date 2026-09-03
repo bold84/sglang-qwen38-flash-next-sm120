@@ -1,5 +1,5 @@
 diff --git a/benchmark/kernels/fused_moe_triton/common_utils.py b/benchmark/kernels/fused_moe_triton/common_utils.py
-index 4c8b4625af..fde44567c0 100644
+index 4c8b4625af22a08a118cbb3115cc4e35e5276036..fde44567c0db1375bb47690bce9127df80062922 100644
 --- a/benchmark/kernels/fused_moe_triton/common_utils.py
 +++ b/benchmark/kernels/fused_moe_triton/common_utils.py
 @@ -90,6 +90,13 @@ def get_model_config(
@@ -18,7 +18,7 @@ index 4c8b4625af..fde44567c0 100644
          "DeepseekV3ForCausalLM",
 diff --git a/python/sglang/kernels/jit/csrc/attention/qsa_indexer.cuh b/python/sglang/kernels/jit/csrc/attention/qsa_indexer.cuh
 new file mode 100644
-index 0000000000..ed0d41ade0
+index 0000000000000000000000000000000000000000..ed0d41ade025720eaa8f0ca9eb0d054bcab26577
 --- /dev/null
 +++ b/python/sglang/kernels/jit/csrc/attention/qsa_indexer.cuh
 @@ -0,0 +1,513 @@
@@ -537,7 +537,7 @@ index 0000000000..ed0d41ade0
 +}  // namespace sglang
 diff --git a/python/sglang/kernels/jit/csrc/elementwise/fast_topk.cuh b/python/sglang/kernels/jit/csrc/elementwise/fast_topk.cuh
 new file mode 100644
-index 0000000000..ef9b1f752e
+index 0000000000000000000000000000000000000000..ef9b1f752e52ed5d6a91eb0cfa634edc9e869092
 --- /dev/null
 +++ b/python/sglang/kernels/jit/csrc/elementwise/fast_topk.cuh
 @@ -0,0 +1,323 @@
@@ -866,7 +866,7 @@ index 0000000000..ef9b1f752e
 +}  // namespace sglang
 diff --git a/python/sglang/kernels/jit/csrc/elementwise/grouped_gemma_rmsnorm.cuh b/python/sglang/kernels/jit/csrc/elementwise/grouped_gemma_rmsnorm.cuh
 new file mode 100644
-index 0000000000..abdde55a6c
+index 0000000000000000000000000000000000000000..abdde55a6c4415e1210fbda433873774094767be
 --- /dev/null
 +++ b/python/sglang/kernels/jit/csrc/elementwise/grouped_gemma_rmsnorm.cuh
 @@ -0,0 +1,178 @@
@@ -1050,7 +1050,7 @@ index 0000000000..abdde55a6c
 +}  // namespace sglang
 diff --git a/python/sglang/kernels/jit/csrc/elementwise/hc_combine.cuh b/python/sglang/kernels/jit/csrc/elementwise/hc_combine.cuh
 new file mode 100644
-index 0000000000..5892d8826e
+index 0000000000000000000000000000000000000000..5892d8826e35d1fbd640716aeb352ed6d50f8030
 --- /dev/null
 +++ b/python/sglang/kernels/jit/csrc/elementwise/hc_combine.cuh
 @@ -0,0 +1,383 @@
@@ -1438,7 +1438,7 @@ index 0000000000..5892d8826e
 +
 +}  // namespace sglang
 diff --git a/python/sglang/kernels/kda_kernels/README.md b/python/sglang/kernels/kda_kernels/README.md
-index 6f1b2fdff1..6682aab52f 100644
+index 6f1b2fdff131b9cb09602d2425b51f860e730557..6682aab52f024e6f3d8f9de6a625ae829893a16f 100644
 --- a/python/sglang/kernels/kda_kernels/README.md
 +++ b/python/sglang/kernels/kda_kernels/README.md
 @@ -23,3 +23,8 @@ load Triton, CUTLASS, or compile a JIT extension.
@@ -1452,7 +1452,7 @@ index 6f1b2fdff1..6682aab52f 100644
 +validated on their target GPU.
 diff --git a/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/README.md b/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/README.md
 new file mode 100644
-index 0000000000..2659868b8f
+index 0000000000000000000000000000000000000000..2659868b8f795b4ae789f756dfde2d8b6f2c4796
 --- /dev/null
 +++ b/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/README.md
 @@ -0,0 +1,51 @@
@@ -1509,7 +1509,7 @@ index 0000000000..2659868b8f
 +is therefore sized for the largest tested batch, 128.
 diff --git a/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/__init__.py b/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/__init__.py
 new file mode 100644
-index 0000000000..15bc622f75
+index 0000000000000000000000000000000000000000..15bc622f75867e82b2a4e6fbff4e9123e5d73524
 --- /dev/null
 +++ b/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/__init__.py
 @@ -0,0 +1,87 @@
@@ -1602,7 +1602,7 @@ index 0000000000..15bc622f75
 +__all__ = ["can_use_qwen38_qsa_sm121", "qwen38_qsa_sm121"]
 diff --git a/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/kernel.py b/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/kernel.py
 new file mode 100644
-index 0000000000..1b067bca72
+index 0000000000000000000000000000000000000000..1b067bca727a68aee587e0fbc2a6d6c05718bdd1
 --- /dev/null
 +++ b/python/sglang/kernels/kda_kernels/qwen38_qsa_sm121/kernel.py
 @@ -0,0 +1,274 @@
@@ -1881,7 +1881,7 @@ index 0000000000..1b067bca72
 +    )
 +    return output
 diff --git a/python/sglang/kernels/ops/attention/__init__.py b/python/sglang/kernels/ops/attention/__init__.py
-index b7516f92db..e9c1042a6c 100644
+index b7516f92db7ff4dce0833ac88083bc8fc36eae5f..e9c1042a6c667c8b42be9e922b4632ef6eeede3e 100644
 --- a/python/sglang/kernels/ops/attention/__init__.py
 +++ b/python/sglang/kernels/ops/attention/__init__.py
 @@ -6,8 +6,21 @@ The Triton kernels migrated here live in this package
@@ -1989,7 +1989,7 @@ index b7516f92db..e9c1042a6c 100644
  # Vendored linear-attention (flash-linear-attention port) kernels relocated
 diff --git a/python/sglang/kernels/ops/attention/qsa_indexer.py b/python/sglang/kernels/ops/attention/qsa_indexer.py
 new file mode 100644
-index 0000000000..054fba6eac
+index 0000000000000000000000000000000000000000..054fba6eac7a830782574176857592346d6f7405
 --- /dev/null
 +++ b/python/sglang/kernels/ops/attention/qsa_indexer.py
 @@ -0,0 +1,176 @@
@@ -2170,7 +2170,7 @@ index 0000000000..054fba6eac
 +        eps,
 +    )
 diff --git a/python/sglang/kernels/ops/attention/triton_gdn_fused_proj.py b/python/sglang/kernels/ops/attention/triton_gdn_fused_proj.py
-index 96f741de28..51ed98e206 100644
+index 96f741de28bf8ce529ae98c1e2bfd3063cfc96cc..51ed98e2064d6147ab36078ad0644ba7cfb1a99e 100644
 --- a/python/sglang/kernels/ops/attention/triton_gdn_fused_proj.py
 +++ b/python/sglang/kernels/ops/attention/triton_gdn_fused_proj.py
 @@ -171,6 +171,8 @@ def fused_qkvzba_split_reshape_cat_contiguous_kernel(
@@ -2247,7 +2247,7 @@ index 96f741de28..51ed98e206 100644
          head_qk,
 diff --git a/python/sglang/kernels/ops/elementwise/fast_topk.py b/python/sglang/kernels/ops/elementwise/fast_topk.py
 new file mode 100644
-index 0000000000..dd1116f5ba
+index 0000000000000000000000000000000000000000..dd1116f5baa3c010aef9282e3df73ea9d1d3bd8c
 --- /dev/null
 +++ b/python/sglang/kernels/ops/elementwise/fast_topk.py
 @@ -0,0 +1,77 @@
@@ -2330,7 +2330,7 @@ index 0000000000..dd1116f5ba
 +    return indices
 diff --git a/python/sglang/kernels/ops/elementwise/hc_combine.py b/python/sglang/kernels/ops/elementwise/hc_combine.py
 new file mode 100644
-index 0000000000..4245cd07c3
+index 0000000000000000000000000000000000000000..4245cd07c30c17d51e4430dd330f310a133f2319
 --- /dev/null
 +++ b/python/sglang/kernels/ops/elementwise/hc_combine.py
 @@ -0,0 +1,136 @@
@@ -2472,7 +2472,7 @@ index 0000000000..4245cd07c3
 +    return out.reshape(residual.shape)
 diff --git a/python/sglang/kernels/ops/elementwise/hc_mix.py b/python/sglang/kernels/ops/elementwise/hc_mix.py
 new file mode 100644
-index 0000000000..d1c911ea62
+index 0000000000000000000000000000000000000000..d1c911ea62274dafef388b976b6d82cf4aa96f91
 --- /dev/null
 +++ b/python/sglang/kernels/ops/elementwise/hc_mix.py
 @@ -0,0 +1,118 @@
@@ -2595,7 +2595,7 @@ index 0000000000..d1c911ea62
 +        )
 +    return out
 diff --git a/python/sglang/kernels/ops/gemm/flashinfer_pr4266_dense_bf16_gemm_sm100_splitk.py b/python/sglang/kernels/ops/gemm/flashinfer_pr4266_dense_bf16_gemm_sm100_splitk.py
-index 9597f836d9..fe2d03229c 100644
+index 9597f836d9f1f3b7c4c45a3120ae9f8c0813574e..fe2d03229c9d982707472d3637ffbf435b842b9e 100644
 --- a/python/sglang/kernels/ops/gemm/flashinfer_pr4266_dense_bf16_gemm_sm100_splitk.py
 +++ b/python/sglang/kernels/ops/gemm/flashinfer_pr4266_dense_bf16_gemm_sm100_splitk.py
 @@ -1,6 +1,6 @@
@@ -3037,7 +3037,7 @@ index 9597f836d9..fe2d03229c 100644
 +    return out
 diff --git a/python/sglang/kernels/ops/layernorm/grouped_gemma_rmsnorm.py b/python/sglang/kernels/ops/layernorm/grouped_gemma_rmsnorm.py
 new file mode 100644
-index 0000000000..8fd57a6378
+index 0000000000000000000000000000000000000000..8fd57a6378cd73c635f664aeeb79cddf40febed8
 --- /dev/null
 +++ b/python/sglang/kernels/ops/layernorm/grouped_gemma_rmsnorm.py
 @@ -0,0 +1,78 @@
@@ -3121,7 +3121,7 @@ index 0000000000..8fd57a6378
 +    return out.reshape(input.shape)
 diff --git a/python/sglang/kernels/ops/qwen4_ple.py b/python/sglang/kernels/ops/qwen4_ple.py
 new file mode 100644
-index 0000000000..b872446f47
+index 0000000000000000000000000000000000000000..b872446f4745bc8052f90d21cdb32ce108ac3911
 --- /dev/null
 +++ b/python/sglang/kernels/ops/qwen4_ple.py
 @@ -0,0 +1,314 @@
@@ -3440,7 +3440,7 @@ index 0000000000..b872446f47
 +        )
 +    return conv_input
 diff --git a/python/sglang/srt/arg_groups/memory_hook.py b/python/sglang/srt/arg_groups/memory_hook.py
-index 39c5b2ad82..d23eed1ef8 100644
+index 39c5b2ad82f35325010a6458cb478fceb4282968..d23eed1ef883493bf4ffabd70bee7f148599a771 100644
 --- a/python/sglang/srt/arg_groups/memory_hook.py
 +++ b/python/sglang/srt/arg_groups/memory_hook.py
 @@ -23,6 +23,23 @@ logger = logging.getLogger(__name__)
@@ -3468,7 +3468,7 @@ index 39c5b2ad82..d23eed1ef8 100644
      """
      Configure GPU memory-dependent settings including
 diff --git a/python/sglang/srt/arg_groups/model_hook.py b/python/sglang/srt/arg_groups/model_hook.py
-index e513232dd9..7e919bc9af 100644
+index e513232dd9783e91b3563b3c452fd3149a333dd1..7e919bc9af90a49bd590083eaeb3ac2bc7d5467d 100644
 --- a/python/sglang/srt/arg_groups/model_hook.py
 +++ b/python/sglang/srt/arg_groups/model_hook.py
 @@ -539,6 +539,7 @@ def handle_model_specific_adjustments(server_args: Any):
@@ -3480,7 +3480,7 @@ index e513232dd9..7e919bc9af 100644
          # The quantization/moe_runner_backend resolution moved to the
          # override registry (arg_groups/overrides.py:
 diff --git a/python/sglang/srt/arg_groups/model_overrides/__init__.py b/python/sglang/srt/arg_groups/model_overrides/__init__.py
-index b9431a2aab..60b9c54ad1 100644
+index b9431a2aaba1abad04301c8b070a458792d273a5..60b9c54ad14468c5195bcaa2bbebb3dfa5a512ba 100644
 --- a/python/sglang/srt/arg_groups/model_overrides/__init__.py
 +++ b/python/sglang/srt/arg_groups/model_overrides/__init__.py
 @@ -36,3 +36,4 @@ from sglang.srt.arg_groups.model_overrides import olmo2  # noqa: F401
@@ -3489,7 +3489,7 @@ index b9431a2aab..60b9c54ad1 100644
  from sglang.srt.arg_groups.model_overrides import qwen3_vl  # noqa: F401
 +from sglang.srt.arg_groups.model_overrides import qwen4_exp  # noqa: F401
 diff --git a/python/sglang/srt/arg_groups/model_overrides/qwen3_moe.py b/python/sglang/srt/arg_groups/model_overrides/qwen3_moe.py
-index 2eeb402bdd..68840f8e2c 100644
+index 2eeb402bdd33dfd21dd8bb724600df89f43b2048..68840f8e2c0eebeaabad52dcc31f2ee95d6daf85 100644
 --- a/python/sglang/srt/arg_groups/model_overrides/qwen3_moe.py
 +++ b/python/sglang/srt/arg_groups/model_overrides/qwen3_moe.py
 @@ -1,6 +1,6 @@
@@ -3510,7 +3510,7 @@ index 2eeb402bdd..68840f8e2c 100644
      cfg = resolving_view(server_args)
 diff --git a/python/sglang/srt/arg_groups/model_overrides/qwen4_exp.py b/python/sglang/srt/arg_groups/model_overrides/qwen4_exp.py
 new file mode 100644
-index 0000000000..9d1ad6fdf8
+index 0000000000000000000000000000000000000000..9d1ad6fdf8a7c16479e9825420b602e2d8394402
 --- /dev/null
 +++ b/python/sglang/srt/arg_groups/model_overrides/qwen4_exp.py
 @@ -0,0 +1,97 @@
@@ -3612,7 +3612,7 @@ index 0000000000..9d1ad6fdf8
 +        )
 +    return overrides
 diff --git a/python/sglang/srt/arg_groups/overrides.py b/python/sglang/srt/arg_groups/overrides.py
-index 9debcb6d77..6f54263a46 100644
+index 9debcb6d7714923cc2886e2bed88a4a9f57df906..6f54263a463a9c638a90043ef1c0e2c12e9b2d06 100644
 --- a/python/sglang/srt/arg_groups/overrides.py
 +++ b/python/sglang/srt/arg_groups/overrides.py
 @@ -502,6 +502,7 @@ _MAMBA_RADIX_CACHE_ARCHS = frozenset(
@@ -3675,7 +3675,7 @@ index 9debcb6d77..6f54263a46 100644
  
  @register_post_process
 diff --git a/python/sglang/srt/arg_groups/pd_disaggregation_hook.py b/python/sglang/srt/arg_groups/pd_disaggregation_hook.py
-index 7e05b9176a..73dc30f9e4 100644
+index 7e05b9176ad2c2c4b7402313b366e8ea20f2473e..73dc30f9e4b2fc4c111e51dbc946ed77de2d1ea7 100644
 --- a/python/sglang/srt/arg_groups/pd_disaggregation_hook.py
 +++ b/python/sglang/srt/arg_groups/pd_disaggregation_hook.py
 @@ -247,6 +247,7 @@ def handle_encoder_disaggregation(server_args: Any):
@@ -3687,7 +3687,7 @@ index 7e05b9176a..73dc30f9e4 100644
          "Qwen3OmniMoeForConditionalGeneration",
          "Qwen2AudioForConditionalGeneration",
 diff --git a/python/sglang/srt/arg_groups/pipeline.py b/python/sglang/srt/arg_groups/pipeline.py
-index 5b9fd2364a..5d9f9f75a8 100644
+index 5b9fd2364a92792d3fa24a9cf554e855b92eabf8..5d9f9f75a8e45dce746ab872b138e646e92364f4 100644
 --- a/python/sglang/srt/arg_groups/pipeline.py
 +++ b/python/sglang/srt/arg_groups/pipeline.py
 @@ -91,6 +91,9 @@ def run_resolution_pipeline(server_args: Any) -> None:
@@ -3711,7 +3711,7 @@ index 5b9fd2364a..5d9f9f75a8 100644
      # Set kernel backends.
      run_post_process_pass(server_args, _sampling_backend_default)
 diff --git a/python/sglang/srt/arg_groups/speculative_hook.py b/python/sglang/srt/arg_groups/speculative_hook.py
-index b7aefdc4a3..767ca198e8 100644
+index b7aefdc4a357ceb842b55c59f30146ea283501a5..767ca198e82eb8e83d82780b30030fe2d013b92c 100644
 --- a/python/sglang/srt/arg_groups/speculative_hook.py
 +++ b/python/sglang/srt/arg_groups/speculative_hook.py
 @@ -698,6 +698,10 @@ def _handle_eagle_family(server_args: ServerArgs) -> None:
@@ -3726,7 +3726,7 @@ index b7aefdc4a3..767ca198e8 100644
          if cfg.speculative_draft_model_path is None:
              declare_resolution(
 diff --git a/python/sglang/srt/configs/__init__.py b/python/sglang/srt/configs/__init__.py
-index 492760909b..84da05d61b 100644
+index 492760909ba5de44552c411ba10798a18ee18cf2..84da05d61b8ef193fdf2f782457f9920fbf57d22 100644
 --- a/python/sglang/srt/configs/__init__.py
 +++ b/python/sglang/srt/configs/__init__.py
 @@ -57,6 +57,7 @@ from sglang.srt.configs.qwen3_5 import (
@@ -3747,7 +3747,7 @@ index 492760909b..84da05d61b 100644
      "Qwen3_5MoeConfig",
      "Qwen3_5TextConfig",
 diff --git a/python/sglang/srt/configs/model_config.py b/python/sglang/srt/configs/model_config.py
-index 1682879d36..4f31ce2fc5 100644
+index 1682879d364c2ccd46429d31f7668e04e9c95118..4f31ce2fc50ca2013dc2803a7b5eaee7bcfef226 100644
 --- a/python/sglang/srt/configs/model_config.py
 +++ b/python/sglang/srt/configs/model_config.py
 @@ -744,6 +744,24 @@ class ModelConfig:
@@ -3793,7 +3793,7 @@ index 1682879d36..4f31ce2fc5 100644
      "KimiK3ForConditionalGeneration",
      "KimiK25ForConditionalGeneration",
 diff --git a/python/sglang/srt/configs/qwen3_5.py b/python/sglang/srt/configs/qwen3_5.py
-index 98de12f7ef..8ab08b647e 100644
+index 98de12f7eff0a09b6f3feb3c5051c4cc06b062c8..8ab08b647e4bcc64e27c5e1ca8efc9865d523a14 100644
 --- a/python/sglang/srt/configs/qwen3_5.py
 +++ b/python/sglang/srt/configs/qwen3_5.py
 @@ -18,6 +18,9 @@ class Qwen3_5TextConfig(Qwen3NextConfig):
@@ -3828,7 +3828,7 @@ index 98de12f7ef..8ab08b647e 100644
  # All Moe variant classes need explicit __init__ because the kw_only=True
 diff --git a/python/sglang/srt/configs/qwen4_exp.py b/python/sglang/srt/configs/qwen4_exp.py
 new file mode 100644
-index 0000000000..e4d52fdf68
+index 0000000000000000000000000000000000000000..e4d52fdf685fad7558181fdaa0e3aff87fef06dc
 --- /dev/null
 +++ b/python/sglang/srt/configs/qwen4_exp.py
 @@ -0,0 +1,169 @@
@@ -4002,7 +4002,7 @@ index 0000000000..e4d52fdf68
 +        )
 +        super().__init__(**kwargs, tie_word_embeddings=tie_word_embeddings)
 diff --git a/python/sglang/srt/configs/update_config.py b/python/sglang/srt/configs/update_config.py
-index e0f0de2b07..2412428a31 100644
+index e0f0de2b070a53500f8e938d90da5c9cd0b85e3d..2412428a316476f05fefaebec6a69b340ea0a687 100644
 --- a/python/sglang/srt/configs/update_config.py
 +++ b/python/sglang/srt/configs/update_config.py
 @@ -309,6 +309,7 @@ def adjust_config_with_unaligned_cpu_tp(
@@ -4014,7 +4014,7 @@ index e0f0de2b07..2412428a31 100644
          [
              model_config.hf_config,
 diff --git a/python/sglang/srt/disaggregation/decode.py b/python/sglang/srt/disaggregation/decode.py
-index 5de5ba9845..c2272acd98 100644
+index 5de5ba98457e690b5d2dc64a31d53b18be1b0a53..c2272acd988c274f9aac467463f38301a99c301c 100644
 --- a/python/sglang/srt/disaggregation/decode.py
 +++ b/python/sglang/srt/disaggregation/decode.py
 @@ -122,7 +122,7 @@ def _bootstrap_addr(req: Req) -> str:
@@ -4027,7 +4027,7 @@ index 5de5ba9845..c2272acd98 100644
      The difference of DecodeReqToTokenPool and ReqToTokenPool is that
      DecodeReqToTokenPool subscribes memory for pre-allocated requests.
 diff --git a/python/sglang/srt/disaggregation/utils.py b/python/sglang/srt/disaggregation/utils.py
-index 9309b3b6a9..1a1163e7e2 100644
+index 9309b3b6a991f99f553167b2528a510b02f481b7..1a1163e7e2dfd0626dfed12d715b12b2cbef7f67 100644
 --- a/python/sglang/srt/disaggregation/utils.py
 +++ b/python/sglang/srt/disaggregation/utils.py
 @@ -19,7 +19,7 @@ import numpy as np
@@ -4051,7 +4051,7 @@ index 9309b3b6a9..1a1163e7e2 100644
  
  
 diff --git a/python/sglang/srt/environ.py b/python/sglang/srt/environ.py
-index d858de8854..b39f6cb870 100644
+index d858de88546af8a01ddfe4bbf2d464a0651d5212..240e87583099e0cc6ca5fa390530f86d0f0df9cc 100644
 --- a/python/sglang/srt/environ.py
 +++ b/python/sglang/srt/environ.py
 @@ -298,6 +298,15 @@ class Envs:
@@ -4087,8 +4087,18 @@ index d858de8854..b39f6cb870 100644
      SGLANG_DEEPGEMM_STANDARD_LAYOUT = EnvStr("auto")
      SGLANG_DEEPGEMM_MASKED_MEMORY_BUDGET_FRACTION = EnvFloat(0.25)
      # Cap the DeepGEMM masked grouped-GEMM per-expert padded capacity at
+@@ -1589,6 +1608,9 @@ class Envs:
+ 
+     # Qwen3.5 and GDN
+     SGLANG_ENABLE_GDN_DECODE_FUSED_PROJ_CONV = EnvBool(True)
++    # Weight-only FP8 clone of the shared lm_head for the NEXTN/EAGLE draft
++    # (draft proposals only; target verify keeps the exact bf16 head).
++    SGLANG_DRAFT_FP8_HEAD = EnvBool(False)
+     SGLANG_TRACE_QWEN35_FINAL_NORM = EnvBool(False)
+     SGLANG_QWEN35_NATIVE_FINAL_NORM = EnvBool(False)
+     # One switch enables deferred MoE finalize and AR + residual + RMSNorm.
 diff --git a/python/sglang/srt/layers/attention/attention_registry.py b/python/sglang/srt/layers/attention/attention_registry.py
-index d60c4de0bb..52bc4ee559 100644
+index d60c4de0bb648afaeae5a2be196038775bd24e87..52bc4ee559c44d7f74c397c2acc401ee7b68d850 100644
 --- a/python/sglang/srt/layers/attention/attention_registry.py
 +++ b/python/sglang/srt/layers/attention/attention_registry.py
 @@ -143,6 +143,15 @@ def create_dsa_backend(runner):
@@ -4124,7 +4134,7 @@ index d60c4de0bb..52bc4ee559 100644
              from sglang.srt.configs.lfm2 import Lfm2Config
              from sglang.srt.configs.lfm2_moe import Lfm2MoeConfig
 diff --git a/python/sglang/srt/layers/attention/hybrid_linear_attn_backend.py b/python/sglang/srt/layers/attention/hybrid_linear_attn_backend.py
-index 126e48bdd2..f009e27e76 100644
+index 126e48bdd297464c8f0dd7ef160ef850f5770125..f009e27e76f971350d5d482eb2c84ee60ae85697 100644
 --- a/python/sglang/srt/layers/attention/hybrid_linear_attn_backend.py
 +++ b/python/sglang/srt/layers/attention/hybrid_linear_attn_backend.py
 @@ -11,6 +11,7 @@ from sglang.kernels.ops.mamba.mamba_state_indices_triton import (
@@ -4301,7 +4311,7 @@ index 126e48bdd2..f009e27e76 100644
  class ShortConvHybridAttnBackend(HybridLinearAttnBackend):
      """HybridLinearAttnBackend variant for short-conv hybrid models (ZAYA1 CCA,
 diff --git a/python/sglang/srt/layers/attention/linear/gdn_backend.py b/python/sglang/srt/layers/attention/linear/gdn_backend.py
-index ac03385113..1618bc55df 100644
+index ac033851136392df82376b70870891df8ebacc52..1618bc55df7cc046235f50b0d614f925875ab9a6 100644
 --- a/python/sglang/srt/layers/attention/linear/gdn_backend.py
 +++ b/python/sglang/srt/layers/attention/linear/gdn_backend.py
 @@ -449,7 +449,6 @@ class GDNAttnBackend(MambaAttnBackendBase):
@@ -4322,7 +4332,7 @@ index ac03385113..1618bc55df 100644
                      projected_qkvz,
 diff --git a/python/sglang/srt/layers/attention/qsa/__init__.py b/python/sglang/srt/layers/attention/qsa/__init__.py
 new file mode 100644
-index 0000000000..d7a9e3b129
+index 0000000000000000000000000000000000000000..d7a9e3b1297365fcafdbb47c5ea3a1468a0423d0
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/__init__.py
 @@ -0,0 +1,40 @@
@@ -4368,7 +4378,7 @@ index 0000000000..d7a9e3b129
 +    raise AttributeError(name)
 diff --git a/python/sglang/srt/layers/attention/qsa/config.py b/python/sglang/srt/layers/attention/qsa/config.py
 new file mode 100644
-index 0000000000..fef9b8dc60
+index 0000000000000000000000000000000000000000..fef9b8dc6003d3b2bcb2408a8b1f6bf378caf55a
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/config.py
 @@ -0,0 +1,201 @@
@@ -4575,7 +4585,7 @@ index 0000000000..fef9b8dc60
 +]
 diff --git a/python/sglang/srt/layers/attention/qsa/dsa_indexer.py b/python/sglang/srt/layers/attention/qsa/dsa_indexer.py
 new file mode 100644
-index 0000000000..408cd2e53d
+index 0000000000000000000000000000000000000000..408cd2e53def3d0022e8a10c709784e6ed06dce0
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/dsa_indexer.py
 @@ -0,0 +1,369 @@
@@ -4950,7 +4960,7 @@ index 0000000000..408cd2e53d
 +]
 diff --git a/python/sglang/srt/layers/attention/qsa/glue.py b/python/sglang/srt/layers/attention/qsa/glue.py
 new file mode 100644
-index 0000000000..86b0cececd
+index 0000000000000000000000000000000000000000..86b0cececd155aae43229acf7b09f43b837b5fc6
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/glue.py
 @@ -0,0 +1,107 @@
@@ -5063,7 +5073,7 @@ index 0000000000..86b0cececd
 +]
 diff --git a/python/sglang/srt/layers/attention/qsa/graph_metadata.py b/python/sglang/srt/layers/attention/qsa/graph_metadata.py
 new file mode 100644
-index 0000000000..2c8964ecd2
+index 0000000000000000000000000000000000000000..2c8964ecd2fffe6c7432343564123d935fb174f0
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/graph_metadata.py
 @@ -0,0 +1,241 @@
@@ -5310,7 +5320,7 @@ index 0000000000..2c8964ecd2
 +    )
 diff --git a/python/sglang/srt/layers/attention/qsa/kernel.py b/python/sglang/srt/layers/attention/qsa/kernel.py
 new file mode 100644
-index 0000000000..85833f9fcb
+index 0000000000000000000000000000000000000000..85833f9fcb1b4589170cf42e8cb1de1c3f6a41d0
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/kernel.py
 @@ -0,0 +1,392 @@
@@ -5708,7 +5718,7 @@ index 0000000000..85833f9fcb
 +]
 diff --git a/python/sglang/srt/layers/attention/qsa/metadata.py b/python/sglang/srt/layers/attention/qsa/metadata.py
 new file mode 100644
-index 0000000000..024b67cf29
+index 0000000000000000000000000000000000000000..024b67cf298c5bc80b614d00b89ef43471ec3df3
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/metadata.py
 @@ -0,0 +1,405 @@
@@ -6119,7 +6129,7 @@ index 0000000000..024b67cf29
 +]
 diff --git a/python/sglang/srt/layers/attention/qsa/mqa.py b/python/sglang/srt/layers/attention/qsa/mqa.py
 new file mode 100644
-index 0000000000..9b2f594ef1
+index 0000000000000000000000000000000000000000..9b2f594ef17ea3effc720ad988ca58a6108ae7dd
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/mqa.py
 @@ -0,0 +1,437 @@
@@ -6562,7 +6572,7 @@ index 0000000000..9b2f594ef1
 +]
 diff --git a/python/sglang/srt/layers/attention/qsa/qsa_indexer.py b/python/sglang/srt/layers/attention/qsa/qsa_indexer.py
 new file mode 100644
-index 0000000000..67a8f3baf8
+index 0000000000000000000000000000000000000000..67a8f3baf8153ed1b2c6e0de2e157fb05f3a0fcf
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/qsa_indexer.py
 @@ -0,0 +1,663 @@
@@ -7231,7 +7241,7 @@ index 0000000000..67a8f3baf8
 +]
 diff --git a/python/sglang/srt/layers/attention/qsa/sparse_attn.py b/python/sglang/srt/layers/attention/qsa/sparse_attn.py
 new file mode 100644
-index 0000000000..b0aa5e934a
+index 0000000000000000000000000000000000000000..b0aa5e934a65b838ee10f6b458fee8dc42a73b41
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qsa/sparse_attn.py
 @@ -0,0 +1,466 @@
@@ -7703,7 +7713,7 @@ index 0000000000..b0aa5e934a
 +]
 diff --git a/python/sglang/srt/layers/attention/qwen_sparse_attn_backend.py b/python/sglang/srt/layers/attention/qwen_sparse_attn_backend.py
 new file mode 100644
-index 0000000000..25f58c2d81
+index 0000000000000000000000000000000000000000..25f58c2d8125a8197abee327e4e947cacec9d65f
 --- /dev/null
 +++ b/python/sglang/srt/layers/attention/qwen_sparse_attn_backend.py
 @@ -0,0 +1,2188 @@
@@ -9895,9 +9905,188 @@ index 0000000000..25f58c2d81
 +    "QwenSparseAttnBackend",
 +    "QwenSparseMultiStepDraftBackend",
 +]
+diff --git a/python/sglang/srt/layers/draft_fp8_head.py b/python/sglang/srt/layers/draft_fp8_head.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..59f22be6f1d521cc67fa023ff218e5c56ed0486f
+--- /dev/null
++++ b/python/sglang/srt/layers/draft_fp8_head.py
+@@ -0,0 +1,173 @@
++"""Weight-only FP8 draft lm_head for speculative decoding.
++
++The EAGLE/NEXTN draft's lm_head only feeds the top-k=1 proposal argmax; the
++target model's exact bf16 head still verifies every token, so FP8 weight
++compression here risks accept length, never output quality.
++
++Contract with the reference path: fp32 accumulation, one rounding to the
++model dtype at the logits store. The FP8 e4m3 weight values convert to bf16
++exactly (3 mantissa bits fit in 7), so the dot runs on the same bf16 tensor
++cores as the reference; the per-row scale multiplies the fp32 accumulator.
++
++Kernel layout: weight [N, K] fp8 row-major (vocab-sharded rows), activations
++[M, K] bf16, out [M, N] model dtype. Bandwidth-bound: N*K fp8 bytes vs 2x
++that for the bf16 reference.
++"""
++
++from __future__ import annotations
++
++import torch
++import triton
++import triton.language as tl
++
++
++@triton.jit
++def _fp8_head_gemv_kernel(
++    a_ptr,        # [M, K] bf16
++    w_ptr,        # [N, K] fp8 e4m3, row-major
++    s_ptr,        # [N] fp32 per-row scales
++    out_ptr,      # [M, N] model dtype
++    M, N, K,
++    stride_am, stride_ak,
++    stride_wn, stride_wk,
++    stride_om, stride_on,
++    BLOCK_M: tl.constexpr,
++    BLOCK_N: tl.constexpr,
++    BLOCK_K: tl.constexpr,
++):
++    pid_n = tl.program_id(0)
++    pid_m = tl.program_id(1)
++    offs_m = pid_m * BLOCK_M + tl.arange(0, BLOCK_M)
++    offs_n = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)
++    offs_k = tl.arange(0, BLOCK_K)
++    mask_m = offs_m < M
++    mask_n = offs_n < N
++
++    a_ptrs = a_ptr + offs_m[:, None] * stride_am + offs_k[None, :] * stride_ak
++    w_ptrs = w_ptr + offs_n[:, None] * stride_wn + offs_k[None, :] * stride_wk
++
++    acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
++    for k0 in range(0, K, BLOCK_K):
++        a = tl.load(a_ptrs, mask=mask_m[:, None], other=0.0)
++        w = tl.load(w_ptrs, mask=mask_n[:, None], other=0.0)
++        # fp8 e4m3 -> bf16 is exact; both operands bf16 -> fp32 tensor-core acc
++        acc = tl.dot(a, tl.trans(w.to(tl.bfloat16)), acc)
++        a_ptrs += BLOCK_K * stride_ak
++        w_ptrs += BLOCK_K * stride_wk
++
++    scale = tl.load(s_ptr + offs_n, mask=mask_n, other=0.0)
++    acc = acc * scale[None, :]
++    out_ptrs = out_ptr + offs_m[:, None] * stride_om + offs_n[None, :] * stride_on
++    tl.store(
++        out_ptrs,
++        acc.to(out_ptr.dtype.element_ty),
++        mask=mask_m[:, None] & mask_n[None, :],
++    )
++
++
++def fp8_head_matmul(
++    a: torch.Tensor,
++    w_fp8: torch.Tensor,
++    scales: torch.Tensor,
++    out_dtype: torch.dtype,
++) -> torch.Tensor:
++    """out[m, n] = sum_k a[m, k] * fp8_dequant(w_fp8[n, k]) * scales[n]."""
++    M, K = a.shape
++    N = w_fp8.shape[0]
++    out = torch.empty((M, N), device=a.device, dtype=out_dtype)
++    if M == 0:
++        return out
++    # M>16: keep all rows in one CTA block so the weight tile is read once
++    # (an M grid would multiply the dominant weight traffic by the M blocks).
++    BLOCK_M = 16 if M <= 16 else 64
++    BLOCK_N = 128
++    BLOCK_K = 128
++    stages = 4 if BLOCK_M == 16 else 3
++    grid = (triton.cdiv(N, BLOCK_N), triton.cdiv(M, BLOCK_M))
++    _fp8_head_gemv_kernel[grid](
++        a,
++        w_fp8,
++        scales,
++        out,
++        M,
++        N,
++        K,
++        a.stride(0),
++        a.stride(1),
++        w_fp8.stride(0),
++        w_fp8.stride(1),
++        out.stride(0),
++        out.stride(1),
++        BLOCK_M=BLOCK_M,
++        BLOCK_N=BLOCK_N,
++        BLOCK_K=BLOCK_K,
++        num_warps=8,
++        num_stages=stages,
++    )
++    return out
++
++
++def quantize_head_fp8(weight: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
++    """Per-row (per-vocab-row) e4m3 quantization of a [N, K] bf16 shard."""
++    w = weight.detach().to(torch.float32)
++    absmax = w.abs().amax(dim=1).clamp_min(1e-12)
++    scales = absmax / 448.0
++    q = (w / scales[:, None]).clamp_(-448.0, 448.0).to(torch.float8_e4m3fn)
++    return q.contiguous(), scales.contiguous()
++
++
++class DraftFp8HeadQuantMethod:
++    """LogitsProcessor quant_method protocol: apply(layer, x, bias)."""
++
++    def apply(self, layer, x: torch.Tensor, bias=None) -> torch.Tensor:
++        assert bias is None
++        return fp8_head_matmul(
++            x, layer._fp8_weight, layer._fp8_scales, layer._logits_dtype
++        )
++
++
++class DraftFp8LMHead(torch.nn.Module):
++    """Wraps the target's ParallelLMHead with an FP8 clone for the draft.
++
++    Attribute access proxies to the target head (shard metadata, vocab
++    offsets) except the pieces the logits path actually dispatches on:
++    ``quant_method`` and the FP8 tensors it reads.
++    """
++
++    def __init__(self, target_head: torch.nn.Module) -> None:
++        super().__init__()
++        # Bypass the module registry so attribute proxying cannot recurse.
++        self.__dict__["_target_head"] = target_head
++        q, s = quantize_head_fp8(target_head.weight)
++        self._fp8_weight = q
++        self._fp8_scales = s
++        self._logits_dtype = target_head.weight.dtype
++        self.quant_method = DraftFp8HeadQuantMethod()
++
++    def __getattr__(self, name: str):
++        try:
++            return super().__getattr__(name)
++        except AttributeError:
++            return getattr(self.__dict__["_target_head"], name)
++
++
++def maybe_wrap_draft_head_fp8(model, enabled: bool, logger) -> None:
++    """Replace the draft's shared lm_head with an FP8 clone (draft only)."""
++    if not enabled:
++        return
++    head = getattr(model, "lm_head", None)
++    if head is None or not hasattr(head, "weight"):
++        logger.warning("draft fp8 head: no lm_head to wrap; keeping bf16")
++        return
++    if head.weight.dtype != torch.bfloat16:
++        logger.warning(
++            "draft fp8 head: unexpected head dtype %s; keeping bf16",
++            head.weight.dtype,
++        )
++        return
++    model.lm_head = DraftFp8LMHead(head)
++    logger.info(
++        "draft lm_head running FP8 weight-only (%.1f MB -> %.1f MB per rank)",
++        head.weight.numel() * 2 / 1e6,
++        head.weight.numel() / 1e6,
++    )
 diff --git a/python/sglang/srt/layers/hc_mix_triton.py b/python/sglang/srt/layers/hc_mix_triton.py
 new file mode 100644
-index 0000000000..7f24d369ee
+index 0000000000000000000000000000000000000000..7f24d369ee6fcab63894bea68856c6b87091b3e9
 --- /dev/null
 +++ b/python/sglang/srt/layers/hc_mix_triton.py
 @@ -0,0 +1,402 @@
@@ -10305,7 +10494,7 @@ index 0000000000..7f24d369ee
 +    return out
 diff --git a/python/sglang/srt/layers/hyperconnection.py b/python/sglang/srt/layers/hyperconnection.py
 new file mode 100644
-index 0000000000..622772da3e
+index 0000000000000000000000000000000000000000..622772da3e6fe97114f9563a21051f342510e348
 --- /dev/null
 +++ b/python/sglang/srt/layers/hyperconnection.py
 @@ -0,0 +1,377 @@
@@ -10687,7 +10876,7 @@ index 0000000000..622772da3e
 +    "gated_residual_simple": GatedResidual,
 +}
 diff --git a/python/sglang/srt/layers/moe/moe_runner/flashinfer_cutlass.py b/python/sglang/srt/layers/moe/moe_runner/flashinfer_cutlass.py
-index ac5d1c78b8..1b75413793 100644
+index ac5d1c78b8a9b76288edcad31da61c9a27656a49..1b75413793de267b0233f4954d3e785efc746b4e 100644
 --- a/python/sglang/srt/layers/moe/moe_runner/flashinfer_cutlass.py
 +++ b/python/sglang/srt/layers/moe/moe_runner/flashinfer_cutlass.py
 @@ -281,13 +281,21 @@ def fused_experts_none_to_flashinfer_cutlass(
@@ -10716,7 +10905,7 @@ index ac5d1c78b8..1b75413793 100644
          quant_info, FlashInferCutlassMoeQuantInfo
 diff --git a/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=256,N=640,device_name=NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition,dtype=fp8_w8a8,block_shape=[128, 128].json b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=256,N=640,device_name=NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition,dtype=fp8_w8a8,block_shape=[128, 128].json
 new file mode 100644
-index 0000000000..d82c67a85b
+index 0000000000000000000000000000000000000000..d82c67a85bbb411978d5d3e17d0f03569c18b769
 --- /dev/null
 +++ b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=256,N=640,device_name=NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition,dtype=fp8_w8a8,block_shape=[128, 128].json	
 @@ -0,0 +1,82 @@
@@ -10804,7 +10993,7 @@ index 0000000000..d82c67a85b
 +}
 diff --git a/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=256,N=640,device_name=NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition,dtype=fp8_w8a8,block_shape=[128, 128]_down.json b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=256,N=640,device_name=NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition,dtype=fp8_w8a8,block_shape=[128, 128]_down.json
 new file mode 100644
-index 0000000000..c359314a7f
+index 0000000000000000000000000000000000000000..c359314a7fa586c5866d5b769e8a04e07ca17f6d
 --- /dev/null
 +++ b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=256,N=640,device_name=NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition,dtype=fp8_w8a8,block_shape=[128, 128]_down.json	
 @@ -0,0 +1,92 @@
@@ -10902,7 +11091,7 @@ index 0000000000..c359314a7f
 +}
 diff --git a/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=160,device_name=NVIDIA_H200.json b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=160,device_name=NVIDIA_H200.json
 new file mode 100644
-index 0000000000..666162be01
+index 0000000000000000000000000000000000000000..666162be0156d453170aa235ec4365ae21393157
 --- /dev/null
 +++ b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=160,device_name=NVIDIA_H200.json
 @@ -0,0 +1,74 @@
@@ -10982,7 +11171,7 @@ index 0000000000..666162be01
 +}
 diff --git a/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=320,device_name=NVIDIA_H200.json b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=320,device_name=NVIDIA_H200.json
 new file mode 100644
-index 0000000000..5676817c1a
+index 0000000000000000000000000000000000000000..5676817c1a20efa956e21d40f67fae5ddb56e165
 --- /dev/null
 +++ b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=320,device_name=NVIDIA_H200.json
 @@ -0,0 +1,74 @@
@@ -11062,7 +11251,7 @@ index 0000000000..5676817c1a
 +}
 diff --git a/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=80,device_name=NVIDIA_H200.json b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=80,device_name=NVIDIA_H200.json
 new file mode 100644
-index 0000000000..ef2d06cbd1
+index 0000000000000000000000000000000000000000..ef2d06cbd14a0555ed63a48adb864b7a37abad9b
 --- /dev/null
 +++ b/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=512,N=80,device_name=NVIDIA_H200.json
 @@ -0,0 +1,74 @@
@@ -11141,7 +11330,7 @@ index 0000000000..ef2d06cbd1
 +    }
 +}
 diff --git a/python/sglang/srt/layers/moe/topk.py b/python/sglang/srt/layers/moe/topk.py
-index 7fa5c8f9ec..e55b9c22b5 100644
+index 7fa5c8f9ece60285dbf45a36ad0b74d12acf8d6a..e55b9c22b564e7fbe209cebfcc930ed42f39c3ef 100644
 --- a/python/sglang/srt/layers/moe/topk.py
 +++ b/python/sglang/srt/layers/moe/topk.py
 @@ -929,6 +929,18 @@ def apply_topk_weights_cpu(need_apply, topk_weights, inputs):
@@ -11223,7 +11412,7 @@ index 7fa5c8f9ec..e55b9c22b5 100644
                  raise ValueError(
                      "sigmoid topk supports at most one fused shared expert"
 diff --git a/python/sglang/srt/layers/quantization/unquant.py b/python/sglang/srt/layers/quantization/unquant.py
-index 2dbd790415..78f80dd532 100644
+index 2dbd790415d57627a76d54af80860c749b48272a..78f80dd5329f0cb14d041aeec82c129596075368 100644
 --- a/python/sglang/srt/layers/quantization/unquant.py
 +++ b/python/sglang/srt/layers/quantization/unquant.py
 @@ -107,6 +107,7 @@ _flashinfer_pr4266_direct_default_tactic = None
@@ -11386,7 +11575,7 @@ index 2dbd790415..78f80dd532 100644
              get_bf16_gemm_backend().is_cutedsl()
              and x.is_cuda
 diff --git a/python/sglang/srt/layers/rotary_embedding/mrope_rope_index.py b/python/sglang/srt/layers/rotary_embedding/mrope_rope_index.py
-index c3ed2b4cd0..62df65330d 100644
+index c3ed2b4cd06e78b6a8304be6c269ae6ded48768f..62df65330dd37ece37f23682769d7dcae661c2cb 100644
 --- a/python/sglang/srt/layers/rotary_embedding/mrope_rope_index.py
 +++ b/python/sglang/srt/layers/rotary_embedding/mrope_rope_index.py
 @@ -74,6 +74,7 @@ def get_rope_index(
@@ -11406,7 +11595,7 @@ index c3ed2b4cd0..62df65330d 100644
                      "interns2_mobius",
                  ):
 diff --git a/python/sglang/srt/layers/vocab_parallel_embedding.py b/python/sglang/srt/layers/vocab_parallel_embedding.py
-index 8576d7ef62..b676b7bf6c 100644
+index 8576d7ef626fef86e69a5a41b2f8f23b1b005f15..b676b7bf6c6690d8b513de037e9115cc0b205bd5 100644
 --- a/python/sglang/srt/layers/vocab_parallel_embedding.py
 +++ b/python/sglang/srt/layers/vocab_parallel_embedding.py
 @@ -234,6 +234,7 @@ class VocabParallelEmbedding(torch.nn.Module):
@@ -11461,7 +11650,7 @@ index 8576d7ef62..b676b7bf6c 100644
          return output_parallel
  
 diff --git a/python/sglang/srt/managers/mm_utils.py b/python/sglang/srt/managers/mm_utils.py
-index 4a9d7a29e8..a0e102b605 100644
+index 4a9d7a29e837ef58b7923ab615e07a8f67185295..a0e102b6053135cf30db9d19ccce279e3fe2b9f9 100644
 --- a/python/sglang/srt/managers/mm_utils.py
 +++ b/python/sglang/srt/managers/mm_utils.py
 @@ -736,7 +736,15 @@ def general_mm_embed_routine(
@@ -11482,7 +11671,7 @@ index 4a9d7a29e8..a0e102b605 100644
              input_embeds = embed_tokens(input_ids)
          # Copy to pre-allocated buffer if available (for CUDA graph address stability)
 diff --git a/python/sglang/srt/mem_cache/allocator/base.py b/python/sglang/srt/mem_cache/allocator/base.py
-index 1417c00b56..895ea928f9 100644
+index 1417c00b56155218a9d4421aebf28c839dfa87a4..895ea928f9e5c435c9b280cb4fc79c0a1eca4abb 100644
 --- a/python/sglang/srt/mem_cache/allocator/base.py
 +++ b/python/sglang/srt/mem_cache/allocator/base.py
 @@ -25,6 +25,8 @@ if TYPE_CHECKING:
@@ -11495,7 +11684,7 @@ index 1417c00b56..895ea928f9 100644
      def __init__(
          self,
 diff --git a/python/sglang/srt/mem_cache/kv_cache_configurator.py b/python/sglang/srt/mem_cache/kv_cache_configurator.py
-index 81f84e68e0..28d1668b5a 100644
+index 81f84e68e0b1e914b5344986d648ffd4614144fa..28d1668b5a432536de217ad319a701323ab756da 100644
 --- a/python/sglang/srt/mem_cache/kv_cache_configurator.py
 +++ b/python/sglang/srt/mem_cache/kv_cache_configurator.py
 @@ -1071,6 +1071,20 @@ class KVCacheConfigurator:
@@ -11598,7 +11787,7 @@ index 81f84e68e0..28d1668b5a 100644
                  if self.draft_swa_full_capacity:
                      # Banded depth: the SWA ring is full draft capacity, so use
 diff --git a/python/sglang/srt/mem_cache/mamba_radix_cache.py b/python/sglang/srt/mem_cache/mamba_radix_cache.py
-index 3a9d46a856..3ee43bb6d1 100644
+index 3a9d46a8563126e18fdc1f68c5b16083afd31b69..3ee43bb6d1f5665216a87ab80fa57ab39a0a5a55 100644
 --- a/python/sglang/srt/mem_cache/mamba_radix_cache.py
 +++ b/python/sglang/srt/mem_cache/mamba_radix_cache.py
 @@ -97,6 +97,8 @@ class TreeNode:
@@ -11619,7 +11808,7 @@ index 3a9d46a856..3ee43bb6d1 100644
          match_result = self.match_prefix(
              MatchPrefixParams(
 diff --git a/python/sglang/srt/mem_cache/memory_pool.py b/python/sglang/srt/mem_cache/memory_pool.py
-index 4a5ab085ab..822e91f475 100644
+index 4a5ab085ab901a7b194c82f04c8491220c87c39e..822e91f47569f8076b502a3504353215a6138efd 100644
 --- a/python/sglang/srt/mem_cache/memory_pool.py
 +++ b/python/sglang/srt/mem_cache/memory_pool.py
 @@ -373,6 +373,17 @@ class MambaPool:
@@ -11834,7 +12023,7 @@ index 4a5ab085ab..822e91f475 100644
          # otherwise the (now unreferenced) slots leak and break the int8-pool
 diff --git a/python/sglang/srt/mem_cache/ple_state_pool.py b/python/sglang/srt/mem_cache/ple_state_pool.py
 new file mode 100644
-index 0000000000..2e603ec3da
+index 0000000000000000000000000000000000000000..2e603ec3da9b11e4d85c76871ea20a71bf08d2ae
 --- /dev/null
 +++ b/python/sglang/srt/mem_cache/ple_state_pool.py
 @@ -0,0 +1,224 @@
@@ -12064,7 +12253,7 @@ index 0000000000..2e603ec3da
 +        )
 diff --git a/python/sglang/srt/mem_cache/qsa_kv_pool.py b/python/sglang/srt/mem_cache/qsa_kv_pool.py
 new file mode 100644
-index 0000000000..e2b63daae5
+index 0000000000000000000000000000000000000000..e2b63daae5711350e8dac6ff2a50e1ad24717d77
 --- /dev/null
 +++ b/python/sglang/srt/mem_cache/qsa_kv_pool.py
 @@ -0,0 +1,343 @@
@@ -12412,7 +12601,7 @@ index 0000000000..e2b63daae5
 +        )
 +        return k_size + dsa_k_size, v_size
 diff --git a/python/sglang/srt/mem_cache/unified_memory_pool.py b/python/sglang/srt/mem_cache/unified_memory_pool.py
-index abe5474500..aaef1d7f00 100644
+index abe5474500ff07166db79d59454b1f2e02ac69e5..aaef1d7f001673ef74a355cca09c38e1f417a0b5 100644
 --- a/python/sglang/srt/mem_cache/unified_memory_pool.py
 +++ b/python/sglang/srt/mem_cache/unified_memory_pool.py
 @@ -1063,11 +1063,35 @@ class UnifiedHybridReqToTokenPool(HybridReqToTokenPool):
@@ -12452,7 +12641,7 @@ index abe5474500..aaef1d7f00 100644
              f"UnifiedHybridReqToTokenPool._init_mamba_pool: mamba_size={mamba_size} "
              f"!= unified_buffer.max_slots({self._mamba_sub_pool_name!r}) - 1 "
 diff --git a/python/sglang/srt/model_executor/forward_batch_info.py b/python/sglang/srt/model_executor/forward_batch_info.py
-index 3926aa58c3..cb12e10f12 100644
+index 3926aa58c3fd109af3ab88f12593e4258ee0b77a..cb12e10f12a7923aca849dc661d888989c99062f 100644
 --- a/python/sglang/srt/model_executor/forward_batch_info.py
 +++ b/python/sglang/srt/model_executor/forward_batch_info.py
 @@ -55,6 +55,7 @@ from sglang.srt.runtime_context import (
@@ -12508,7 +12697,7 @@ index 3926aa58c3..cb12e10f12 100644
          """
          Merge all multimodal inputs in the batch into a single MultiModalInputs object.
 diff --git a/python/sglang/srt/model_executor/model_runner_components/load_model_utils.py b/python/sglang/srt/model_executor/model_runner_components/load_model_utils.py
-index 0ea3c517cf..e06fea9b90 100644
+index 0ea3c517cf05e34e36e512b5e7ee8f30e6768e6f..e06fea9b900abc57d150be49c29c73a445c6711c 100644
 --- a/python/sglang/srt/model_executor/model_runner_components/load_model_utils.py
 +++ b/python/sglang/srt/model_executor/model_runner_components/load_model_utils.py
 @@ -265,6 +265,18 @@ def load_model_with_memory_saver(
@@ -12544,7 +12733,7 @@ index 0ea3c517cf..e06fea9b90 100644
      # To avoid conflict with memory_saver_adapter.region, empty_cache operation is now moved here.
      if _is_npu:
 diff --git a/python/sglang/srt/model_executor/pool_configurator.py b/python/sglang/srt/model_executor/pool_configurator.py
-index 38b7fccd42..6a290f52b8 100644
+index 38b7fccd42d4c106344d39a50606108d0653c3b5..6a290f52b8c48a9cc1826effcc09473d293e9b2b 100644
 --- a/python/sglang/srt/model_executor/pool_configurator.py
 +++ b/python/sglang/srt/model_executor/pool_configurator.py
 @@ -359,8 +359,40 @@ class DefaultPoolConfigurator(MemoryPoolConfigurator):
@@ -12597,7 +12786,7 @@ index 38b7fccd42..6a290f52b8 100644
              available_bytes // self._cell_size
              if self._cell_size
 diff --git a/python/sglang/srt/model_executor/runner/flashinfer_autotune.py b/python/sglang/srt/model_executor/runner/flashinfer_autotune.py
-index 5c56e55c18..56c3c5e802 100644
+index 5c56e55c180a870cac98ff60cf8e1795f566faec..56c3c5e802b07c2b16fa5f6f92d6be26e2d3333f 100644
 --- a/python/sglang/srt/model_executor/runner/flashinfer_autotune.py
 +++ b/python/sglang/srt/model_executor/runner/flashinfer_autotune.py
 @@ -212,6 +212,13 @@ def _autotune_cache_digest(cache_path: Path, env: dict[str, str]) -> str:
@@ -12684,7 +12873,7 @@ index 5c56e55c18..56c3c5e802 100644
              yield
      torch.cuda.current_stream().wait_stream(mr.forward_stream)
 diff --git a/python/sglang/srt/model_executor/runner_backend/breakable_cuda_graph_backend.py b/python/sglang/srt/model_executor/runner_backend/breakable_cuda_graph_backend.py
-index d4da89192f..ba7b87fed0 100644
+index d4da89192f8ce420d80488f6f76e01bff2dba220..ba7b87fed08c82eae6671c474b61d3fb291c20f8 100644
 --- a/python/sglang/srt/model_executor/runner_backend/breakable_cuda_graph_backend.py
 +++ b/python/sglang/srt/model_executor/runner_backend/breakable_cuda_graph_backend.py
 @@ -18,6 +18,7 @@ No torch.compile.
@@ -12846,7 +13035,7 @@ index d4da89192f..ba7b87fed0 100644
          self._pool = None
          self._shared_output_buffer = None
 diff --git a/python/sglang/srt/models/qwen3_5.py b/python/sglang/srt/models/qwen3_5.py
-index 2268b835d9..86a51606e7 100644
+index 2268b835d9cd9b445d172a445eb5ab93e8d25b8c..86a51606e7754e21c2130f8e83b1c337a20862a5 100644
 --- a/python/sglang/srt/models/qwen3_5.py
 +++ b/python/sglang/srt/models/qwen3_5.py
 @@ -67,6 +67,10 @@ from sglang.srt.layers.parameter import (
@@ -13125,7 +13314,7 @@ index 2268b835d9..86a51606e7 100644
          return self.embed_tokens
  
 diff --git a/python/sglang/srt/models/qwen3_vl.py b/python/sglang/srt/models/qwen3_vl.py
-index 2b7f1cc067..fc0959f7c0 100644
+index 2b7f1cc0675fdb4bcbb4bff858b2d4e44d69b158..fc0959f7c0de3fd847d99ea38d74c10d798f880a 100644
 --- a/python/sglang/srt/models/qwen3_vl.py
 +++ b/python/sglang/srt/models/qwen3_vl.py
 @@ -1366,7 +1366,13 @@ class Qwen3VLForConditionalGeneration(nn.Module):
@@ -13145,7 +13334,7 @@ index 2b7f1cc067..fc0959f7c0 100644
              self.num_deepstack_embeddings = 0
 diff --git a/python/sglang/srt/models/qwen4_exp.py b/python/sglang/srt/models/qwen4_exp.py
 new file mode 100644
-index 0000000000..ecefacd867
+index 0000000000000000000000000000000000000000..ecefacd86707ac60a9592788a5763fd4f07db346
 --- /dev/null
 +++ b/python/sglang/srt/models/qwen4_exp.py
 @@ -0,0 +1,2138 @@
@@ -15289,10 +15478,10 @@ index 0000000000..ecefacd867
 +EntryClass = [Qwen4ExpForConditionalGeneration]
 diff --git a/python/sglang/srt/models/qwen4_exp_mtp.py b/python/sglang/srt/models/qwen4_exp_mtp.py
 new file mode 100644
-index 0000000000..5f0becb2bd
+index 0000000000000000000000000000000000000000..180c28b15cc25561684c8792647411fe8fe69c73
 --- /dev/null
 +++ b/python/sglang/srt/models/qwen4_exp_mtp.py
-@@ -0,0 +1,226 @@
+@@ -0,0 +1,233 @@
 +"""Inference-only Qwen4-Exp MTP speculative decoding."""
 +
 +import copy
@@ -15364,6 +15553,13 @@ index 0000000000..5f0becb2bd
 +            use_attn_tp_group=get_parallel().enable_dp_lm_head,
 +        )
 +        self.logits_processor = LogitsProcessor(config)
++
++    def set_lm_head_from_target(self, target_lm_head):
++        super().set_lm_head_from_target(target_lm_head)
++        if envs.SGLANG_DRAFT_FP8_HEAD.get():
++            from sglang.srt.layers.draft_fp8_head import maybe_wrap_draft_head_fp8
++
++            maybe_wrap_draft_head_fp8(self, True, logger)
 +
 +    def _init_pre_fc_norms(self, config: PretrainedConfig) -> None:
 +        self.pre_fc_norm_embedding = GemmaRMSNorm(
@@ -15520,7 +15716,7 @@ index 0000000000..5f0becb2bd
 +
 +EntryClass = [Qwen4ExpForCausalLMMTP]
 diff --git a/python/sglang/srt/multimodal/processors/qwen_vl.py b/python/sglang/srt/multimodal/processors/qwen_vl.py
-index cac51f22bb..c4e2a33c72 100644
+index cac51f22bb2e69386eb36c7581ab9f686f4a4554..c4e2a33c726a4503b245cb09f77b5d218b42c655 100644
 --- a/python/sglang/srt/multimodal/processors/qwen_vl.py
 +++ b/python/sglang/srt/multimodal/processors/qwen_vl.py
 @@ -31,6 +31,7 @@ from sglang.srt.models.qwen3_5_mtp import Qwen3_5ForCausalLMMTP
@@ -15572,7 +15768,7 @@ index cac51f22bb..c4e2a33c72 100644
              "interns2_mobius",
          ):
 diff --git a/python/sglang/srt/server_args.py b/python/sglang/srt/server_args.py
-index fa4b80ed3a..4179b0077f 100644
+index fa4b80ed3a0caa6d6580d9850ed46d09784f6383..4179b0077f61ab50ef3dd1c7e27acb52fec14805 100644
 --- a/python/sglang/srt/server_args.py
 +++ b/python/sglang/srt/server_args.py
 @@ -175,6 +175,7 @@ ATTENTION_BACKEND_CHOICES = [
@@ -15602,7 +15798,7 @@ index fa4b80ed3a..4179b0077f 100644
          Optional[str],
          Arg(
 diff --git a/python/sglang/srt/speculative/draft_utils.py b/python/sglang/srt/speculative/draft_utils.py
-index 13de33ad6e..55a477f82a 100644
+index 13de33ad6ef7ca21000bf70bc6f729e716cdcba9..55a477f82a1e9cb092759534b6cb7207a1046861 100644
 --- a/python/sglang/srt/speculative/draft_utils.py
 +++ b/python/sglang/srt/speculative/draft_utils.py
 @@ -81,6 +81,9 @@ class DraftBackendFactory:
@@ -15668,7 +15864,7 @@ index 13de33ad6e..55a477f82a 100644
          from sglang.srt.layers.attention.dsa_backend import (
              DeepseekSparseAttnMultiStepBackend,
 diff --git a/python/sglang/srt/speculative/eagle_draft_cuda_graph_runner.py b/python/sglang/srt/speculative/eagle_draft_cuda_graph_runner.py
-index 1ca19cbf6f..f6cb7cf3ae 100644
+index 1ca19cbf6f0a683d9e016559f399ade73c43f966..f6cb7cf3ae8f3b5f3041ed53d4368e746d834eaa 100644
 --- a/python/sglang/srt/speculative/eagle_draft_cuda_graph_runner.py
 +++ b/python/sglang/srt/speculative/eagle_draft_cuda_graph_runner.py
 @@ -668,7 +668,10 @@ class EAGLEDraftCudaGraphRunner(DecodeCudaGraphRunner):
@@ -15683,7 +15879,7 @@ index 1ca19cbf6f..f6cb7cf3ae 100644
          self.bs = bs
  
 diff --git a/python/sglang/srt/speculative/eagle_worker_v2.py b/python/sglang/srt/speculative/eagle_worker_v2.py
-index 875c81688c..d4df687f3f 100644
+index 875c81688cc86b9fdbd3a3e5cb9b6ed380708112..d4df687f3f9d4eef09b9679752d0033b7b7ea795 100644
 --- a/python/sglang/srt/speculative/eagle_worker_v2.py
 +++ b/python/sglang/srt/speculative/eagle_worker_v2.py
 @@ -20,6 +20,7 @@ from sglang.srt.hardware_backend.npu.graph_runner.npu_graph_runner import NPUGra
@@ -15806,7 +16002,7 @@ index 875c81688c..d4df687f3f 100644
              _is_cuda or _is_musa
          ) and graph_supported_backend
 diff --git a/python/sglang/srt/speculative/multi_layer_eagle_worker_v2.py b/python/sglang/srt/speculative/multi_layer_eagle_worker_v2.py
-index cb8b824431..84dec83e3d 100644
+index cb8b824431a64de9839818146519eff4a9f23b09..84dec83e3dea7a7e59623241890a90246eb163cc 100644
 --- a/python/sglang/srt/speculative/multi_layer_eagle_worker_v2.py
 +++ b/python/sglang/srt/speculative/multi_layer_eagle_worker_v2.py
 @@ -364,6 +364,15 @@ class MultiLayerEagleDraftWorker(EagleDraftWorkerBase):
@@ -15826,7 +16022,7 @@ index cb8b824431..84dec83e3d 100644
          self.draft_extend_attn_backend_list = []
          for step in range(self.speculative_num_steps):
 diff --git a/python/sglang/srt/speculative/spec_utils.py b/python/sglang/srt/speculative/spec_utils.py
-index 25db452c5f..f140db6d70 100644
+index 25db452c5faf71bb35ac999be839f173599750c3..f140db6d70a9a0fc130734be04f3c0ec6b80a3da 100644
 --- a/python/sglang/srt/speculative/spec_utils.py
 +++ b/python/sglang/srt/speculative/spec_utils.py
 @@ -49,6 +49,7 @@ from sglang.srt.mem_cache.allocation import (
@@ -15893,7 +16089,7 @@ index 25db452c5f..f140db6d70 100644
  
      if (
 diff --git a/python/sglang/srt/utils/common.py b/python/sglang/srt/utils/common.py
-index 35614abcbd..d8d4098a8c 100644
+index 35614abcbd0de544150b469d809ac54a40f12884..d8d4098a8c32b9941231b53a30fa152b9ef1b73c 100644
 --- a/python/sglang/srt/utils/common.py
 +++ b/python/sglang/srt/utils/common.py
 @@ -317,6 +317,12 @@ is_sm90_supported = lru_cache(maxsize=1)(
@@ -15910,7 +16106,7 @@ index 35614abcbd..d8d4098a8c 100644
  # _check_cuda_device_version, which only matches on the major.
  @lru_cache(maxsize=1)
 diff --git a/python/sglang/srt/utils/hf_transformers/common.py b/python/sglang/srt/utils/hf_transformers/common.py
-index 5ffa8530c4..26588d4531 100644
+index 5ffa8530c4d70277594e4d28ffdb9e84aa21e993..26588d4531f027f1973cd836df510cde45eca3e5 100644
 --- a/python/sglang/srt/utils/hf_transformers/common.py
 +++ b/python/sglang/srt/utils/hf_transformers/common.py
 @@ -66,6 +66,8 @@ from sglang.srt.configs import (
@@ -15932,7 +16128,7 @@ index 5ffa8530c4..26588d4531 100644
          GraniteMoeHybridConfig,
          DotsVLMConfig,
 diff --git a/python/sglang/test/run_eval.py b/python/sglang/test/run_eval.py
-index cf7d9a0f77..7b6a4117dd 100644
+index cf7d9a0f770473a88d133b13ae74c82a9315a6f4..7b6a4117dd104e19457a98d6c9a9d82566f72d54 100644
 --- a/python/sglang/test/run_eval.py
 +++ b/python/sglang/test/run_eval.py
 @@ -299,6 +299,8 @@ def run_eval(args):
@@ -15945,7 +16141,7 @@ index cf7d9a0f77..7b6a4117dd 100644
          if getattr(args, "api", None) == "sgl_eval":
              # Only the nightly correctness eval opts into sgl-eval (zero-shot
 diff --git a/test/registered/cuda_graph/breakable/test_breakable_cuda_graph.py b/test/registered/cuda_graph/breakable/test_breakable_cuda_graph.py
-index 9ad679fdd8..9852524049 100644
+index 9ad679fdd8114c9e3996b1d41fab851c62b428cc..9852524049aa6de17f203c7ef70cce6d769b9ca5 100644
 --- a/test/registered/cuda_graph/breakable/test_breakable_cuda_graph.py
 +++ b/test/registered/cuda_graph/breakable/test_breakable_cuda_graph.py
 @@ -267,6 +267,35 @@ class TestBreakableCUDAGraphBasic(CustomTestCase):
@@ -15986,7 +16182,7 @@ index 9ad679fdd8..9852524049 100644
  
 diff --git a/test/registered/kernels/benchmark/attention/bench_qsa_indexer.py b/test/registered/kernels/benchmark/attention/bench_qsa_indexer.py
 new file mode 100644
-index 0000000000..25727ae8eb
+index 0000000000000000000000000000000000000000..25727ae8eb7fad8045e98476fb5f4fbb2003f526
 --- /dev/null
 +++ b/test/registered/kernels/benchmark/attention/bench_qsa_indexer.py
 @@ -0,0 +1,217 @@
@@ -16209,7 +16405,7 @@ index 0000000000..25727ae8eb
 +    benchmark.run()
 diff --git a/test/registered/kernels/benchmark/elementwise/bench_fast_topk.py b/test/registered/kernels/benchmark/elementwise/bench_fast_topk.py
 new file mode 100644
-index 0000000000..56e2f3e9a3
+index 0000000000000000000000000000000000000000..56e2f3e9a37363d68cc656a9e26a58416e4cf1e4
 --- /dev/null
 +++ b/test/registered/kernels/benchmark/elementwise/bench_fast_topk.py
 @@ -0,0 +1,45 @@
@@ -16260,7 +16456,7 @@ index 0000000000..56e2f3e9a3
 +    benchmark.run()
 diff --git a/test/registered/kernels/benchmark/elementwise/bench_hc_combine.py b/test/registered/kernels/benchmark/elementwise/bench_hc_combine.py
 new file mode 100644
-index 0000000000..367043ad7b
+index 0000000000000000000000000000000000000000..367043ad7b5f4c29033e3af2bf93b8cb67a2fdc8
 --- /dev/null
 +++ b/test/registered/kernels/benchmark/elementwise/bench_hc_combine.py
 @@ -0,0 +1,62 @@
@@ -16328,7 +16524,7 @@ index 0000000000..367043ad7b
 +    benchmark.run()
 diff --git a/test/registered/kernels/benchmark/layernorm/bench_grouped_gemma_rmsnorm.py b/test/registered/kernels/benchmark/layernorm/bench_grouped_gemma_rmsnorm.py
 new file mode 100644
-index 0000000000..b5355d2b14
+index 0000000000000000000000000000000000000000..b5355d2b14b340e9f4c350669069ebd45ee43131
 --- /dev/null
 +++ b/test/registered/kernels/benchmark/layernorm/bench_grouped_gemma_rmsnorm.py
 @@ -0,0 +1,48 @@
@@ -16382,7 +16578,7 @@ index 0000000000..b5355d2b14
 +    benchmark.run()
 diff --git a/test/registered/kernels/benchmark/layernorm/bench_qwen4_ple_norm.py b/test/registered/kernels/benchmark/layernorm/bench_qwen4_ple_norm.py
 new file mode 100644
-index 0000000000..42ef0e88ec
+index 0000000000000000000000000000000000000000..42ef0e88ec69325ad5580badcf2af518fe7ffb90
 --- /dev/null
 +++ b/test/registered/kernels/benchmark/layernorm/bench_qwen4_ple_norm.py
 @@ -0,0 +1,49 @@
@@ -16437,7 +16633,7 @@ index 0000000000..42ef0e88ec
 +    benchmark.run()
 diff --git a/test/registered/kernels/ops/attention/test_qkvzba_split_ratio3.py b/test/registered/kernels/ops/attention/test_qkvzba_split_ratio3.py
 new file mode 100644
-index 0000000000..93b7c6770e
+index 0000000000000000000000000000000000000000..93b7c6770e7215a6062eb6fbe827f72745a8a725
 --- /dev/null
 +++ b/test/registered/kernels/ops/attention/test_qkvzba_split_ratio3.py
 @@ -0,0 +1,52 @@
@@ -16495,7 +16691,7 @@ index 0000000000..93b7c6770e
 +    sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/kernels/ops/attention/test_qsa_indexer.py b/test/registered/kernels/ops/attention/test_qsa_indexer.py
 new file mode 100644
-index 0000000000..af225087e9
+index 0000000000000000000000000000000000000000..af225087e91a01b7f34b1f4ccec314e613da3c70
 --- /dev/null
 +++ b/test/registered/kernels/ops/attention/test_qsa_indexer.py
 @@ -0,0 +1,477 @@
@@ -16978,7 +17174,7 @@ index 0000000000..af225087e9
 +    sys.exit(pytest.main([__file__, "-v", "-s"]))
 diff --git a/test/registered/kernels/ops/elementwise/test_fast_topk.py b/test/registered/kernels/ops/elementwise/test_fast_topk.py
 new file mode 100644
-index 0000000000..360ad6f50e
+index 0000000000000000000000000000000000000000..360ad6f50e99983155fac2f98a8f6365695d17f3
 --- /dev/null
 +++ b/test/registered/kernels/ops/elementwise/test_fast_topk.py
 @@ -0,0 +1,145 @@
@@ -17129,7 +17325,7 @@ index 0000000000..360ad6f50e
 +    sys.exit(pytest.main([__file__, "-v", "-s"]))
 diff --git a/test/registered/kernels/ops/elementwise/test_hc_combine.py b/test/registered/kernels/ops/elementwise/test_hc_combine.py
 new file mode 100644
-index 0000000000..7cf54125e7
+index 0000000000000000000000000000000000000000..7cf54125e7eaa4038ee0f7c839758a655e7e5be9
 --- /dev/null
 +++ b/test/registered/kernels/ops/elementwise/test_hc_combine.py
 @@ -0,0 +1,213 @@
@@ -17348,7 +17544,7 @@ index 0000000000..7cf54125e7
 +    sys.exit(pytest.main([__file__, "-v", "-s"]))
 diff --git a/test/registered/kernels/ops/embeddings/test_qwen4_ple_offload.py b/test/registered/kernels/ops/embeddings/test_qwen4_ple_offload.py
 new file mode 100644
-index 0000000000..6454cb3e75
+index 0000000000000000000000000000000000000000..6454cb3e75af5ae0be60e3d113e01e90468df58d
 --- /dev/null
 +++ b/test/registered/kernels/ops/embeddings/test_qwen4_ple_offload.py
 @@ -0,0 +1,195 @@
@@ -17549,7 +17745,7 @@ index 0000000000..6454cb3e75
 +    sys.exit(pytest.main([__file__, "-v", "-s"]))
 diff --git a/test/registered/kernels/ops/embeddings/test_qwen4_ple_offload_tp4.py b/test/registered/kernels/ops/embeddings/test_qwen4_ple_offload_tp4.py
 new file mode 100644
-index 0000000000..5d685d277e
+index 0000000000000000000000000000000000000000..5d685d277e1074f6be25f21a44a87ec1c8dc2a23
 --- /dev/null
 +++ b/test/registered/kernels/ops/embeddings/test_qwen4_ple_offload_tp4.py
 @@ -0,0 +1,109 @@
@@ -17664,7 +17860,7 @@ index 0000000000..5d685d277e
 +    raise SystemExit(pytest.main([__file__, "-v", "-s"]))
 diff --git a/test/registered/kernels/ops/layernorm/test_grouped_gemma_rmsnorm.py b/test/registered/kernels/ops/layernorm/test_grouped_gemma_rmsnorm.py
 new file mode 100644
-index 0000000000..79870e21e5
+index 0000000000000000000000000000000000000000..79870e21e5cfa111b063e74fc99adb0c41e293f9
 --- /dev/null
 +++ b/test/registered/kernels/ops/layernorm/test_grouped_gemma_rmsnorm.py
 @@ -0,0 +1,114 @@
@@ -17784,7 +17980,7 @@ index 0000000000..79870e21e5
 +    sys.exit(pytest.main([__file__, "-v", "-s"]))
 diff --git a/test/registered/kernels/ops/layernorm/test_qwen4_ple_norm.py b/test/registered/kernels/ops/layernorm/test_qwen4_ple_norm.py
 new file mode 100644
-index 0000000000..71d4bfbc80
+index 0000000000000000000000000000000000000000..71d4bfbc800c519a52e0482c59c842124c7abf27
 --- /dev/null
 +++ b/test/registered/kernels/ops/layernorm/test_qwen4_ple_norm.py
 @@ -0,0 +1,125 @@
@@ -17914,7 +18110,7 @@ index 0000000000..71d4bfbc80
 +
 +    sys.exit(pytest.main([__file__, "-v", "-s"]))
 diff --git a/test/registered/kernels/ops/moe/test_moe_fused_gate.py b/test/registered/kernels/ops/moe/test_moe_fused_gate.py
-index 3e909fa958..631effd013 100644
+index 3e909fa958d1c55be8dc759492383c10472f5120..631effd013c803db5e4b774058aa2906bf3a08a7 100644
 --- a/test/registered/kernels/ops/moe/test_moe_fused_gate.py
 +++ b/test/registered/kernels/ops/moe/test_moe_fused_gate.py
 @@ -360,6 +360,7 @@ def test_moe_fused_gate_softmax_none_bias_matches_zero_bias(M: int) -> None:
@@ -17927,7 +18123,7 @@ index 3e909fa958..631effd013 100644
          (1, 128, 4, True, True, torch.float32),
 diff --git a/test/registered/kernels/test_hc_mix_triton.py b/test/registered/kernels/test_hc_mix_triton.py
 new file mode 100644
-index 0000000000..0bc1a360a2
+index 0000000000000000000000000000000000000000..0bc1a360a2fa2b9e5196eb2183cf21504ef70d70
 --- /dev/null
 +++ b/test/registered/kernels/test_hc_mix_triton.py
 @@ -0,0 +1,138 @@
@@ -18071,7 +18267,7 @@ index 0000000000..0bc1a360a2
 +    sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/kernels/test_kda_qsa_sm121.py b/test/registered/kernels/test_kda_qsa_sm121.py
 new file mode 100644
-index 0000000000..b45face1c6
+index 0000000000000000000000000000000000000000..b45face1c67d42c75c58a51337f7cb2cbc4f1475
 --- /dev/null
 +++ b/test/registered/kernels/test_kda_qsa_sm121.py
 @@ -0,0 +1,182 @@
@@ -18259,7 +18455,7 @@ index 0000000000..b45face1c6
 +    unittest.main()
 diff --git a/test/registered/kernels/test_qsa.py b/test/registered/kernels/test_qsa.py
 new file mode 100644
-index 0000000000..a2c759edd8
+index 0000000000000000000000000000000000000000..a2c759edd8a2a709407d533f76ed442b111b8f1a
 --- /dev/null
 +++ b/test/registered/kernels/test_qsa.py
 @@ -0,0 +1,2865 @@
@@ -21130,7 +21326,7 @@ index 0000000000..a2c759edd8
 +    sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/kernels/test_qsa_mtp_shared_indexer.py b/test/registered/kernels/test_qsa_mtp_shared_indexer.py
 new file mode 100644
-index 0000000000..c877bcf1c6
+index 0000000000000000000000000000000000000000..c877bcf1c68e85d40d65c71e4425201d699b8bf3
 --- /dev/null
 +++ b/test/registered/kernels/test_qsa_mtp_shared_indexer.py
 @@ -0,0 +1,265 @@
@@ -21401,7 +21597,7 @@ index 0000000000..c877bcf1c6
 +    sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/kernels/test_qwen4_ple_fusion.py b/test/registered/kernels/test_qwen4_ple_fusion.py
 new file mode 100644
-index 0000000000..df84b35191
+index 0000000000000000000000000000000000000000..df84b35191d6718424074147125ac85dd53e7044
 --- /dev/null
 +++ b/test/registered/kernels/test_qwen4_ple_fusion.py
 @@ -0,0 +1,122 @@
@@ -21529,7 +21725,7 @@ index 0000000000..df84b35191
 +    assert envs.SGLANG_ENABLE_QWEN4_PLE_FUSION.get()
 diff --git a/test/registered/kernels/test_verify_commit_triton.py b/test/registered/kernels/test_verify_commit_triton.py
 new file mode 100644
-index 0000000000..41c61a07ca
+index 0000000000000000000000000000000000000000..41c61a07ca2c5c1b798d344993f9a8b4fb339094
 --- /dev/null
 +++ b/test/registered/kernels/test_verify_commit_triton.py
 @@ -0,0 +1,79 @@
@@ -21614,7 +21810,7 @@ index 0000000000..41c61a07ca
 +    sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/models_e2e/test_qwen4_exp_models.py b/test/registered/models_e2e/test_qwen4_exp_models.py
 new file mode 100644
-index 0000000000..c95975adb6
+index 0000000000000000000000000000000000000000..c95975adb67c1c70d21b97bb2801cfb2fb22abb0
 --- /dev/null
 +++ b/test/registered/models_e2e/test_qwen4_exp_models.py
 @@ -0,0 +1,95 @@
@@ -21715,7 +21911,7 @@ index 0000000000..c95975adb6
 +    unittest.main()
 diff --git a/test/registered/unit/layers/attention/test_qsa_row_to_request.py b/test/registered/unit/layers/attention/test_qsa_row_to_request.py
 new file mode 100644
-index 0000000000..b0b5588e34
+index 0000000000000000000000000000000000000000..b0b5588e34d766cb9bf60126e21510c0e66bea19
 --- /dev/null
 +++ b/test/registered/unit/layers/attention/test_qsa_row_to_request.py
 @@ -0,0 +1,76 @@
@@ -21796,7 +21992,7 @@ index 0000000000..b0b5588e34
 +if __name__ == "__main__":
 +    sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/unit/layers/moe/test_flashinfer_a2a_wide_ep.py b/test/registered/unit/layers/moe/test_flashinfer_a2a_wide_ep.py
-index 16197d8432..4f9af1bc08 100644
+index 16197d84327154f39ca1a44e1ae1945d9e827e94..4f9af1bc08ff456234bf1aa48ce46c94836aa863 100644
 --- a/test/registered/unit/layers/moe/test_flashinfer_a2a_wide_ep.py
 +++ b/test/registered/unit/layers/moe/test_flashinfer_a2a_wide_ep.py
 @@ -1,4 +1,5 @@
@@ -21848,7 +22044,7 @@ index 16197d8432..4f9af1bc08 100644
      def test_dp4_tp4_uses_physical_source_rank_geometry(self):
          self.assertEqual(_max_tokens_per_scattered_source([2048] * 4, 4), 512)
 diff --git a/test/registered/unit/mem_cache/test_mamba_unittest.py b/test/registered/unit/mem_cache/test_mamba_unittest.py
-index 313de93ae4..4917a7c49e 100755
+index 313de93ae41299822acaec7c8e55665980254705..4917a7c49ead9c6e5290666cf3a1b1a9df3baef3 100755
 --- a/test/registered/unit/mem_cache/test_mamba_unittest.py
 +++ b/test/registered/unit/mem_cache/test_mamba_unittest.py
 @@ -631,6 +631,164 @@ class TestMamba(unittest.TestCase):
@@ -22018,7 +22214,7 @@ index 313de93ae4..4917a7c49e 100755
          _, _, req_to_token_pool, _ = self._setup_tree_and_allocator()
 diff --git a/test/registered/unit/mem_cache/test_qsa_compressed_addressing.py b/test/registered/unit/mem_cache/test_qsa_compressed_addressing.py
 new file mode 100644
-index 0000000000..838f7212e0
+index 0000000000000000000000000000000000000000..838f7212e0c03e163cd357e682a4d06841174d82
 --- /dev/null
 +++ b/test/registered/unit/mem_cache/test_qsa_compressed_addressing.py
 @@ -0,0 +1,137 @@
@@ -22160,7 +22356,7 @@ index 0000000000..838f7212e0
 +if __name__ == "__main__":
 +    unittest.main()
 diff --git a/test/registered/unit/model_executor/runner/test_flashinfer_autotune.py b/test/registered/unit/model_executor/runner/test_flashinfer_autotune.py
-index cacb8bd003..af8be208c4 100644
+index cacb8bd0038d2bf5707dfc37104456d92fa42720..af8be208c4b31ab735ed140b0fa93ef7ed9f3beb 100644
 --- a/test/registered/unit/model_executor/runner/test_flashinfer_autotune.py
 +++ b/test/registered/unit/model_executor/runner/test_flashinfer_autotune.py
 @@ -47,6 +47,41 @@ def test_packed_speculative_extend_is_limited_to_pd_prefill_target(mode, error):
@@ -22274,7 +22470,7 @@ index cacb8bd003..af8be208c4 100644
  if __name__ == "__main__":
      sys.exit(pytest.main([__file__, "-v"]))
 diff --git a/test/registered/unit/server_args/test_server_args.py b/test/registered/unit/server_args/test_server_args.py
-index b81bdd2dfd..ec5c622e98 100644
+index b81bdd2dfd24769438896f33b666c487f32eab06..ec5c622e989e5d65bb46846e1a957f43de97da9d 100644
 --- a/test/registered/unit/server_args/test_server_args.py
 +++ b/test/registered/unit/server_args/test_server_args.py
 @@ -104,6 +104,23 @@ _mock_device.start()
@@ -22302,7 +22498,7 @@ index b81bdd2dfd..ec5c622e98 100644
          args = ServerArgs(
              model_path="dummy",
 diff --git a/test/registered/unit/spec/test_ngram_mamba_verify_update.py b/test/registered/unit/spec/test_ngram_mamba_verify_update.py
-index a620b5f2ff..dda2e9781d 100644
+index a620b5f2ff6b24cf0dbaaf577f33e660f74c0376..dda2e9781d7f859e21df9ef60c56d165af1e392d 100644
 --- a/test/registered/unit/spec/test_ngram_mamba_verify_update.py
 +++ b/test/registered/unit/spec/test_ngram_mamba_verify_update.py
 @@ -96,13 +96,19 @@ class TestNgramLastCorrectStepIndices(CustomTestCase):
@@ -22411,7 +22607,7 @@ index a620b5f2ff..dda2e9781d 100644
  class TestConvWindowDedupLayout(CustomTestCase):
      """KDA stores conv_state as (K-1, channel), unlike GDN; partial-accept
 diff --git a/test/registered/unit/test_model_overrides.py b/test/registered/unit/test_model_overrides.py
-index 27e18bc76c..38dccb5bfe 100644
+index 27e18bc76c6bbcb648ccb76ec1a8c69bf396bc5e..38dccb5bfe28aec09e5df924fa86dbc05132c2bc 100644
 --- a/test/registered/unit/test_model_overrides.py
 +++ b/test/registered/unit/test_model_overrides.py
 @@ -88,6 +88,7 @@ class TestModelOverridableWhitelist(CustomTestCase):
