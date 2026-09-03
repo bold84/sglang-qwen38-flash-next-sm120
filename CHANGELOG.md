@@ -2,6 +2,12 @@
 
 ## v0.1.0-rc.12
 
+- chunked-prefill-size 8192 -> 16384 in the tested profile: raw prefill
+  TTFT -3.5% at 32K-128K (flush-cache A/B/A/B interleave: 32K 1868 vs
+  1934 ms, 128K 8021 vs 8319 ms), decode unchanged (step-proxy 12.32 vs
+  12.31), accuracy neutral on the full 1319-question official GSM8K
+  protocol (0.9333 vs 0.9318). The pinned MoE tactic cache already covers
+  the 16384-row bucket.
 - Weight-only FP8 clone of the shared lm_head for the NEXTN draft
   (`SGLANG_DRAFT_FP8_HEAD=1`, wired in the launcher): the draft's 2-3
   full-vocab GEMV passes per decode step drop from 445us to 219us each

@@ -108,7 +108,7 @@ exec sglang serve \
   --ep $EP_SIZE \
   --context-length $CONTEXT_LENGTH \
   --mem-fraction-static 0.85 \
-  --chunked-prefill-size 8192 \
+  --chunked-prefill-size 16384 \
   --linear-attn-prefill-backend flashinfer \
   --linear-attn-decode-backend flashinfer \
   --mamba-ssm-dtype bfloat16 \

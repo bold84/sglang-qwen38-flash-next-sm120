@@ -192,15 +192,21 @@ outside the converter's own record.**
    (64,8,2)] SLOWER than the inherited (16,1,2) at 8K rows (0.60–0.85 vs
    0.59 ms) AND numerically different (maxdiff ~1.6 — BLOCK_N changes
    per-row token coverage, not a free knob). Table stands.
-3. ~~chunked-prefill-size 16384~~ — **tested 09-03 (evening), rejected.**
-   First measurement vs the archived baselines showed −27%/−43% TTFT at
-   32K/128K; the **same-window interleaved control reversed it**: 32K favors
-   8192 by ~5% (1479 vs 1542/1577), 128K favors 16384 by ~1.5% (5125/5188
-   vs 5246), decode identical within accept-lottery scatter. The archived
-   8K baseline was ~30% slower than the same config re-measured today —
-   the cross-era drift trap again, bigger than documented. Per-layer CPU
-   glue is per-forward, and halving chunk count halves it, but the effect
-   is ~5% at 32K, inside noise. Tested envelope (8192) stands.
+3. **chunked-prefill-size 16384** — **landed 09-03 (evening), after two
+   false verdicts.** First pass vs archived baselines showed −27%/−43%
+   TTFT (stale-baseline drift); the first same-window control reversed it
+   — because those runs lacked `--flush-cache`, so radix replays diluted
+   and boundary-shifted the signal. The decisive A/B/A/B with flush-cache
+   (raw prefill): 16K wins uniformly — 8K 478/478 vs 490/479, 32K
+   1874/1862 vs 1932/1936, 128K 8016/8026 vs 8316/8321 ms (**−3.5%** at
+   32K–128K), decode step-proxy unchanged (12.32 vs 12.31). Quality: the
+   5×256 gate looked −0.7pt low (0.9437 vs pooled 0.9508) but the full
+   1319-question official protocol says neutral (0.9333 vs 0.9318) —
+   256-question gates carry ±0.7pt subsample noise on this harness.
+   Lessons: (a) prefill A/Bs MUST flush cache or radix replay pollutes
+   TTFT; (b) borderline 256-question gates resolve with the 1319 official
+   run before rejecting. Pinned tactic cache already covers the 16384
+   bucket (EXTEND tuning ceiling), no retune needed.
 4. ~~Triton skinny split-K GEMM for decode dense projections~~ — **tested
    09-03, rejected.** GPU-only profiling showed the in-server cuBLAS picks
    (wmma 16x16/32x32) already stream the fused in_proj at ~1.54 TB/s and a

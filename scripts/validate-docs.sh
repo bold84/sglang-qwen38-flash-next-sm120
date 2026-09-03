@@ -32,7 +32,7 @@ critical=(
   'CONTEXT_LENGTH=${CONTEXT_LENGTH:-262144}'
   'NEXTN=${NEXTN:-1}'
   '--mem-fraction-static 0.85'
-  '--chunked-prefill-size 8192'
+  '--chunked-prefill-size 16384'
   '--linear-attn-prefill-backend flashinfer'
   '--linear-attn-decode-backend flashinfer'
   '--mamba-ssm-dtype bfloat16'
