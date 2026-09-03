@@ -192,7 +192,42 @@ outside the converter's own record.**
    (64,8,2)] SLOWER than the inherited (16,1,2) at 8K rows (0.60–0.85 vs
    0.59 ms) AND numerically different (maxdiff ~1.6 — BLOCK_N changes
    per-row token coverage, not a free knob). Table stands.
-3. ~~Decode-shape MoE tactic retune~~ — **tested 09-03, rejected.**
+3. ~~chunked-prefill-size 16384~~ — **tested 09-03 (evening), rejected.**
+   First measurement vs the archived baselines showed −27%/−43% TTFT at
+   32K/128K; the **same-window interleaved control reversed it**: 32K favors
+   8192 by ~5% (1479 vs 1542/1577), 128K favors 16384 by ~1.5% (5125/5188
+   vs 5246), decode identical within accept-lottery scatter. The archived
+   8K baseline was ~30% slower than the same config re-measured today —
+   the cross-era drift trap again, bigger than documented. Per-layer CPU
+   glue is per-forward, and halving chunk count halves it, but the effect
+   is ~5% at 32K, inside noise. Tested envelope (8192) stands.
+4. ~~Triton skinny split-K GEMM for decode dense projections~~ — **tested
+   09-03, rejected.** GPU-only profiling showed the in-server cuBLAS picks
+   (wmma 16x16/32x32) already stream the fused in_proj at ~1.54 TB/s and a
+   tuned Triton split-K table lost everywhere (0.3–0.99×) on the exact
+   decode shapes; F.linear hits 1.5–1.8 TB/s = bandwidth roofline. The old
+   "3.38 vs 2.12 ms/step" gap estimate did not survive contact with shapes.
+   Decode dense GEMM is weight-bandwidth-bound at peak; only weight
+   quantization moves it (checkpoint territory, out of scope).
+5. ~~HC persistent-mix tile retune (rows≤16)~~ — **tested 09-03,
+   rejected.** An idle+interleaved rerun showed base ≈ variant at rows
+   4/8/12/16 (12.3–13.6 µs); the apparent 27% win was server-traffic
+   contamination of the microbench. Microbenches MUST run with the server
+   idle (or GPU-isolated); one contaminated sweep produced a phantom.
+6. **FP8 draft lm_head (weight-only, draft only)** — **landed 09-03**,
+   `SGLANG_DRAFT_FP8_HEAD` (default off). The NEXTN draft's shared lm_head
+   (2 draft GEMVs + draft-extend per step, 445 µs each at bf16, M=1–64)
+   gets an e4m3 per-row-scaled clone; e4m3→bf16 conversion is exact, fp32
+   accumulate, one bf16 rounding at the logits store (same boundary as the
+   reference). 219 µs in-graph (2.04×), step-proxy C1 12.31 vs 12.99 ms
+   (**−5.2% decode**, 4/4 reps, no overlap), accept length identical
+   (2.83 vs 2.83). Target verify keeps the exact bf16 head, so output
+   quality is structurally untouched. GSM8K 5×256 gate: 0.9492/0.9531/
+   0.9375/0.9570/0.9570 (mean 0.9508) vs same-window bf16 control
+   0.9453/0.9570 — at/above band, accepted.
+   Files: `srt/layers/draft_fp8_head.py`, override in
+   `models/qwen4_exp_mtp.py::set_lm_head_from_target`.
+7. ~~Decode-shape MoE tactic retune~~ — **tested 09-03, rejected.**
    Standalone `cutlass_fused_moe` sweep with `profile_ids` override
    (TP1 proxy, EP-shaped weights, Swiglu) found [17,56] 7% faster than
    pinned [19,57] at rows=16, and [17,57] 4% faster than the rows=128
@@ -202,7 +237,7 @@ outside the converter's own record.**
    capture change the picture). Pinned cache restored from backup. Lesson:
    in-situ autotune beats proxy benchmarks; don't hand-edit the tactic
    JSON without a serving gate.
-4. **NCCL_P2P_LEVEL=SYS + NCCL_CUMEM_ENABLE=1** (must be pre-set in the
+8. **NCCL_P2P_LEVEL=SYS + NCCL_CUMEM_ENABLE=1** (must be pre-set in the
 ## Key references for the retry
 
 - Model: `/root/autodl-tmp/models/Qwen3.8-Flash-Next-NVFP4` (kept; 137 GB),

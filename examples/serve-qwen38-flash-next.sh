@@ -98,6 +98,7 @@ exec docker run --rm \
   --env NCCL_MAX_NCHANNELS=16 \
   --env NCCL_NTHREADS=256 \
   --env SGLANG_FLASHINFER_AUTOTUNE_EXTEND=1 \
+  --env SGLANG_DRAFT_FP8_HEAD=1 \
   "$IMAGE" \
   -c "$seed_autotune
 exec sglang serve \
