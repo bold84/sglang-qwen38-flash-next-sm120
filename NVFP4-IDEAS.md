@@ -94,9 +94,19 @@ outside the converter's own record.**
   quant-comms**: all arch-gated off on SM120 (capability-12 missing from
   size tables, NVLink-only Lamport paths, ROCm/NPU-only). Verified in source;
   don't spend runs.
-- **GDN fused decode proj+conv** (`SGLANG_ENABLE_GDN_DECODE_FUSED_PROJ_CONV`):
-  dormant under NEXTN — target-verify never takes the decode forward mode.
-- **Prefill CUDA graphs (breakable)**: measured 1.5–1.9× *slower* (17.6 s vs
+- **GDN fused decode at draft-extend** (tested 09-03, rejected): widened the
+  `is_decode()` gate to include `is_draft_extend_v2()`. Kernel bit-exact,
+  1.65× standalone (37 vs 62 µs at 64 rows) — **zero end-to-end**
+  (flush-cache C4/128: 21.27/21.82 vs 19.01/21.09 ms). Draft-extend is too
+  thin a slice; the graph already overlaps unpack+conv. Reverted. Lesson:
+  standalone kernel speedups don't transfer when the block isn't on the
+  critical path — profile the tail, not the kernel.
+- **Draft-extend LM-head prune** (tested 09-03, parked broken): pruning the
+  draft LM head 64→16 rows via `select_index` in the draft-extend graph
+  runner collapses accept 2.9→1.0 (correct outputs via target-only fallback,
+  but all speculation lost). Stashed as WIP in the sglang retry branch;
+  needs forensics on why the pruned forward poisons draft logits (select
+  rows match the worker formula — the corruption is elsewhere).
   11.6 s at 128K) on this arch. QSA builds host-side sparse metadata per
   forward; deliberately excluded upstream.
 - **NCCL channel/thread variants**: 8ch 1.322 / 16ch 1.294 / 24ch 1.296 /
@@ -177,20 +187,22 @@ outside the converter's own record.**
    kernel is deterministic where the torch.compile path it replaces does
    instance-varying inductor autotuning; accepted on the unit-level
    semantics guarantee + the sign test, with the lottery caveat recorded.
-2. **QSA chunk-prefill BLOCK_N table** — non-H20 devices inherit a
-   Hopper-era `_L20_CONFIGS` table; (16,1,2) at 8 192 tokens; sweep
-   (32,4,2)/(32,4,3)/(64,2,2). Ceiling ~4–6 ms/chunk (~1%).
-3. **NCCL_P2P_LEVEL=SYS + NCCL_CUMEM_ENABLE=1** (must be pre-set in the
-   launching shell — SGLang clobbers it otherwise): flips transport from
-   host-staged SHM to P2P/CUMEM. Big-message upside ≈0 (both at the wire
-   floor) but removes proxy hops for small collectives. Low priority.
-4. **Tactic-draw selection for accuracy, not just speed.** Evidence that
-   different valid tactic draws correlate with different greedy behavior
-   (style-flip modes). If the official-protocol gap turns out
-   stack-numerics-related, try pinning tactics to the draw that reproduces
-   the official GSM8K band, or disable MoE autotune entirely
-   (`--disable-flashinfer-autotune`, heuristic tactic 0) and re-measure.
-
+2. ~~QSA chunk-prefill BLOCK_N table~~ — **tested 09-03, rejected.** All
+   five alternatives [(32,4,2), (32,4,3), (64,4,2), (64,2,2), (32,8,2),
+   (64,8,2)] SLOWER than the inherited (16,1,2) at 8K rows (0.60–0.85 vs
+   0.59 ms) AND numerically different (maxdiff ~1.6 — BLOCK_N changes
+   per-row token coverage, not a free knob). Table stands.
+3. ~~Decode-shape MoE tactic retune~~ — **tested 09-03, rejected.**
+   Standalone `cutlass_fused_moe` sweep with `profile_ids` override
+   (TP1 proxy, EP-shaped weights, Swiglu) found [17,56] 7% faster than
+   pinned [19,57] at rows=16, and [17,57] 4% faster than the rows=128
+   bucket's [17,49] at rows=80. In-server A/B (flush-cache C4/128):
+   retuned 23.60/23.34 vs control 19.01/21.09 ms — **proxy ranking did
+   not transfer** (EP2 routing, real weight distribution, and graph
+   capture change the picture). Pinned cache restored from backup. Lesson:
+   in-situ autotune beats proxy benchmarks; don't hand-edit the tactic
+   JSON without a serving gate.
+4. **NCCL_P2P_LEVEL=SYS + NCCL_CUMEM_ENABLE=1** (must be pre-set in the
 ## Key references for the retry
 
 - Model: `/root/autodl-tmp/models/Qwen3.8-Flash-Next-NVFP4` (kept; 137 GB),
